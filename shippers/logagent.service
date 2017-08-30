@@ -1,0 +1,16 @@
+[Unit]
+Description=Process journal with logagent
+
+[Service]
+WorkingDirectory=/etc/logagent
+Environment="PATH=/opt/logagent/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+ExecStart=/usr/bin/sh -c 'logagent.js -v info conf.yml | bunyan -o short'
+KillSignal=SIGINT
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=0
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

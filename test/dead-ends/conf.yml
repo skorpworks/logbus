@@ -1,0 +1,60 @@
+
+pipeline:
+
+  syslog:
+    module: tail
+    config:
+      globs:
+        - '*.log'
+
+  some-syslog:
+    module: js
+    inChannels:
+      - syslog
+    config:
+      function: !!js/function >-
+        function(event) {
+          return event
+        }
+
+  dead-end:
+    module: js
+    inChannels:
+      - some-syslog
+    outChannels:
+      - bar
+    config:
+      function: !!js/function >-
+        function(event) {
+          return event
+        }
+
+  dead-start:
+    module: js
+    inChannels:
+      - foo
+    outChannels:
+      - log
+    config:
+      function: !!js/function >-
+        function(event) {
+          return event
+        }
+
+  dead-both:
+    module: js
+    inChannels:
+      - foo
+    outChannels:
+      - bar
+    config:
+      function: !!js/function >-
+        function(event) {
+          return event
+        }
+
+  console-log:
+    module: log
+    inChannels:
+      - log
+      - log-errors

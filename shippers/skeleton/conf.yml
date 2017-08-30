@@ -1,0 +1,111 @@
+
+pipeline:
+
+  # logs:
+  #   module: stdin
+  #   config:
+  #     stopOnEOF: true
+
+  logs:
+    module: tail
+    config:
+      globs:
+        - /path/to/some-log-file
+
+  lines:
+    inChannels:
+      - logs
+
+  # TODO: Define your feed specific deets here.
+  parse:
+    module: js
+    inChannels:
+      - lines
+    config:
+      ignoredIPs:
+        '2001:1938:0:8008:214:4fff:fef2:8494': true
+      function: !!js/function >-
+        function(line) {
+          var m = line.match(/^(\S+) (\S+) (.+)$/)
+          if (!m) {
+            console.log('bad line:', line)
+            return // ignore it
+          }
+          var event = {}
+          event.ts = this.moment.utc(m[1], 'YYYY-MM-DDThh:mm:ss.SSSSSSZ')
+          event.hostname = m[2]
+          event.message = m[3]
+          // Use a better, more unique _id.
+          event._id = [event.ts, event.hostname].join('::')
+          // Example of enriching with extra data.
+          event.pop = event.hostname.split('-')[0].toUpperCase()
+          // Send the event downstream
+          return event
+        }
+
+  elasticify:
+    module: js
+    inChannels:
+      - parse
+      - log-errors
+      - log-stats
+    config:
+      function: !!js/function >-
+        function(event) {
+          if (!event.type) {
+            event.type = 'unknown'
+          }
+          if (!event._index) {
+            if (event.type === 'stats') {
+              event._index = 'logagent.stats-' + event.ts.format('YYYY.MM')
+              event.type = 'sample'
+            }
+            else if (event.type === 'error') {
+              event._index = 'logagent.errors-' + event.ts.format('YYYY.MM')
+              event.type = 'sample'
+            }
+            else {
+              event._index = event.type || 'wtf'
+            }
+          }
+          event.shipper = this.hostname
+          return event
+        }
+
+  index:
+    module: elasticsearch
+    outChannels: []
+    inChannels:
+      - elasticify
+    config:
+      api: '5.3'
+      hosts:
+        - host: your.es.host
+          auth: 'user:password'
+          protocol: https
+          port: 443
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      interval: 60
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+    config:
+      interval: 300
+      enable:
+        memory: true
+        # rates: true
+
+  console-log:
+    module: log
+    inChannels:
+      - log
+      - log-errors
+      - log-stats

@@ -1,0 +1,10 @@
+
+INPUT : syslog
+  - some-syslog
+DEADEND : dead-end
+
+DEADEND : dead-both
+DEADEND : dead-both
+
+DEADEND : dead-start
+OUTPUT : console-log

@@ -1,0 +1,13 @@
+test/*/out.json
+.DS_Store
+.grunt
+.logagent-js
+build
+config/test.yml
+coverage
+lib-cov
+maxmind-city.mmdb
+node_modules
+pkg/opt/logagent
+rpm
+shippers/*.rpm

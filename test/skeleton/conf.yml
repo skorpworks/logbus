@@ -1,0 +1,84 @@
+
+pipeline:
+
+  test-input:
+    module: file-in
+    config:
+      globs:
+        - test/skeleton/test.log
+
+  lines:
+    inChannels:
+      - test-input
+
+  # TODO: Define your feed specific deets here.
+  parse:
+    module: js
+    inChannels:
+      - lines
+    config:
+      ignoredIPs:
+        '2001:1938:0:8008:214:4fff:fef2:8494': true
+      function: !!js/function >-
+        function(line) {
+          var m = line.match(/^(\S+) (\S+) (.+)$/)
+          if (!m) {
+            console.log('bad line:', line)
+            return // ignore it
+          }
+          var event = {}
+          event.ts = this.moment.utc(m[1], 'YYYY-MM-DDThh:mm:ss.SSSSSSZ')
+          event.hostname = m[2]
+          event.message = m[3]
+          // Use a better, more unique _id.
+          event._id = [event.ts].join('::')
+          event._id = event.ts
+          // Example of enriching with extra data.
+          event.pop = event.hostname.split('-')[0].toUpperCase()
+          // Send the event downstream
+          return event
+        }
+
+  # Remove variable & environment specific data and transform to format that is
+  # easier for `jq` to produce deterministic results.
+  testify:
+    module: js
+    inChannels:
+      - parse
+    config:
+      function: !!js/function >-
+        function(event) {
+          delete event.shipper
+          return {key: event._id, value: event}
+        }
+
+  json-output:
+    module: json-out
+    inChannels:
+      - testify
+
+  test-output:
+    module: file-out
+    inChannels:
+      - json-output
+    config:
+      path: test/skeleton/out.json
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      interval: 5
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+
+  log:
+    inChannels:
+      - log
+      - log-errors
+      - log-stats

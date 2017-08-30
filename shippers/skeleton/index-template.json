@@ -1,0 +1,28 @@
+TODO: Change 'skeleton' references.
+{
+  "order" : 0,
+  "template" : "skeleton-*",
+  "settings" : {
+    "index" : {
+      "routing" : {
+        "allocation" : {
+          "require" : {
+            "temp" : "hot"
+          },
+          "total_shards_per_node" : "5"
+        }
+      },
+      "refresh_interval" : "5s",
+      "number_of_shards" : "5",
+      "query" : {
+        "default_field" : "message"
+      }
+    }
+  },
+  "mappings" : {
+    TODO: Put your feed specific mapping here.
+  },
+  "aliases" : {
+    "skeleton" : { }
+  }
+}
