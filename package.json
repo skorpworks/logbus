@@ -47,6 +47,5 @@
     "sync-request": "^4.0.3",
     "tail-forever": "^0.3.13"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

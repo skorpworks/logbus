@@ -30,15 +30,15 @@ node_modules: package.json ## install dependencies
 	npm install
 
 start: VERBOSITY=info# log level
-start: CONF=config/test.yml# lobgus config file
-start: node_modules ## start lobgus
-	node bin/lobgus.js -v $(VERBOSITY) $(CONF) -c
+start: CONF=config/test.yml# logbus config file
+start: node_modules ## start logbus
+	node bin/logbus.js -v $(VERBOSITY) $(CONF) -c
 
 
 test: node_modules ## run automated tests
-	diff -U2 test/dead-ends/out.txt <(./bin/lobgus.js -c test/dead-ends/conf.yml)
+	diff -U2 test/dead-ends/out.txt <(./bin/logbus.js -c test/dead-ends/conf.yml)
 	for dir in $$(ls -d test/* | grep -v dead-ends); do \
-	  test -f $$dir/conf.yml && echo $$dir && ./bin/lobgus.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
+	  test -f $$dir/conf.yml && echo $$dir && ./bin/logbus.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
 	done
 
 docker-build: Dockerfile ## build docker image
@@ -51,20 +51,20 @@ docker-publish: ## publish docker image to repo
 
 # Experiment with other container runtimes:
 #
-# pkg/opt/lobgus/rootfs: docker-build ## build rootfs
-# 	test -d pkg/opt/lobgus/rootfs || mkdir -p pkg/opt/lobgus/rootfs
+# pkg/opt/logbus/rootfs: docker-build ## build rootfs
+# 	test -d pkg/opt/logbus/rootfs || mkdir -p pkg/opt/logbus/rootfs
 # 	cid=$$(docker run -i -d $(DOCKER_TAG) sh)
-# 	docker export $$cid | tar x -C pkg/opt/lobgus/rootfs
+# 	docker export $$cid | tar x -C pkg/opt/logbus/rootfs
 # 	docker rm -f $$cid
 
 
 RELEASE := $(shell echo $$(( $$(rpm -qp --qf %{RELEASE} rpm 2>/dev/null) + 1)))
 rpm: Makefile lib bin node_modules ## build rpm
-	rsync -va package.json pkg/opt/lobgus/package.json
-	rsync -va --exclude test/ --exclude alasql/utils/ node_modules/ --delete-excluded pkg/opt/lobgus/node_modules/
-	rsync -va lib/ pkg/opt/lobgus/lib/
-	rsync -va bin/ pkg/opt/lobgus/bin/
-	cp node_modules/.bin/bunyan pkg/opt/lobgus/bin/
+	rsync -va package.json pkg/opt/logbus/package.json
+	rsync -va --exclude test/ --exclude alasql/utils/ node_modules/ --delete-excluded pkg/opt/logbus/node_modules/
+	rsync -va lib/ pkg/opt/logbus/lib/
+	rsync -va bin/ pkg/opt/logbus/bin/
+	cp node_modules/.bin/bunyan pkg/opt/logbus/bin/
 	fpm --force --rpm-os linux -s dir -t rpm -C pkg --package rpm --name $(NAME) \
 	  --version $(VERSION) --iteration $(RELEASE) \
 	  --after-install post-install.sh \
@@ -80,12 +80,12 @@ rpm-publish: rpm ## publish rpm to yum server
 
 shippers/%.rpm: VERSION=0.1# version
 shippers/%.rpm: ## build shipper specific rpms
-	mkdir -p build/etc/lobgus/ build/etc/systemd/system
-	rsync -vaL --delete shippers/$*/ build/etc/lobgus/
-	rsync -va shippers/lobgus.service build/etc/systemd/system/lobgus.service
-	fpm --force --rpm-os linux -s dir -t rpm -C build --package $@ --name lobgus-shipper-$* \
+	mkdir -p build/etc/logbus/ build/etc/systemd/system
+	rsync -vaL --delete shippers/$*/ build/etc/logbus/
+	rsync -va shippers/logbus.service build/etc/systemd/system/logbus.service
+	fpm --force --rpm-os linux -s dir -t rpm -C build --package $@ --name logbus-shipper-$* \
 	  --version $(VERSION) \
 	  --after-install shippers/post-install.sh \
-	  --depends lobgus \
+	  --depends logbus \
 	  --vendor custom --maintainer '<$(MAINTAINER)>' \
 	  --rpm-summary 'Config for $* logbus shipper' --url https://github.com/skorpworks/logbus
