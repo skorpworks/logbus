@@ -38,6 +38,10 @@ pipeline:
           // Send the event downstream
           return event
         }
+      lastCall: !!js/function >-
+        function() {
+          return {_id: 'YEEE!', message: 'Hi, Mom!'}
+        }
 
   # Remove variable & environment specific data and transform to format that is
   # easier for `jq` to produce deterministic results.

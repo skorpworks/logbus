@@ -1,23 +1,6 @@
 #!/bin/sh
 ':' // ; exec "$(command -v node || command -v nodejs)" --harmony "${NODE_OPTIONS:---max-old-space-size=1024}" "$0" "$@"
 'use strict'
-/*
- * See the NOTICE.txt file distributed with this work for additional information
- * regarding copyright ownership.
- * Sematext licenses logagent-js to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 
 var USAGE = `
 Process logs from configured pipeline.
@@ -49,7 +32,10 @@ var MODULES = {
   agg: '../lib/plugins/agg',
   cast: '../lib/plugins/cast',
   drop: '../lib/plugins/drop-fields',
-  elasticsearch: '../lib/plugins/output/elasticsearch',
+  // 'elasticsearch-in': '../lib/plugins/input/elasticsearch',
+  'elasticsearch-log': '../lib/plugins/elasticsearch',
+  'elasticsearch-out': '../lib/plugins/output/elasticsearch',
+  elasticsearch: '../lib/plugins/output/elasticsearch', // DEPRECATED
   errors: '../lib/plugins/errors',
   gc: '../lib/plugins/gc',
   geoip: '../lib/plugins/geoip',
@@ -165,8 +151,10 @@ var Stage = function(name, stage, pipeline, log) {
 }
 
 Stage.prototype.emitEvent = function(event) {
-  for (var outChannel of this.outChannels) {
-    this.pipeline.emit(outChannel, event)
+  if (event) {
+    for (var outChannel of this.outChannels) {
+      this.pipeline.emit(outChannel, event)
+    }
   }
 }
 
@@ -333,7 +321,7 @@ LaCli.prototype.terminate = function() {
 }
 
 if (require.main === module) {
-  var logagent = new LaCli()
+  var logbus = new LaCli()
 }
 else {
   module.exports = LaCli

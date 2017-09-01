@@ -1,16 +1,15 @@
 {
-  "name": "@cips/logagent",
-  "version": "0.0.1",
+  "name": "logbus",
+  "version": "0.1.0",
   "description": "Log shipper written in Node",
-  "private": true,
   "bin": {
-    "logagent": "bin/logagent.js"
+    "logbus": "bin/logbus.js"
   },
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha",
+    "test": "make test",
     "build": "make docker",
     "publish": "make publish",
     "start": "make start"
@@ -48,7 +47,5 @@
     "sync-request": "^4.0.3",
     "tail-forever": "^0.3.13"
   },
-  "devDependencies": {
-    "mocha": "^2.5.3"
-  }
+  "devDependencies": {}
 }

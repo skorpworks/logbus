@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in /etc/logagent/plugins/*/package.json
+for i in /etc/logbus/plugins/*/package.json
 do
   if test -e "$i"
   then
@@ -11,5 +11,5 @@ do
 done
 
 systemctl daemon-reload
-systemctl enable logagent.service
-systemctl start logagent.service
+systemctl enable logbus.service
+systemctl start logbus.service

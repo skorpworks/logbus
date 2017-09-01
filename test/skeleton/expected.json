@@ -1,23 +1,27 @@
 {
   "2017-04-25T23:05:22.361Z": {
     "_id": "2017-04-25T23:05:22.361Z",
-    "hostname": "some.host.name",
+    "hostname": "flg-01.logbus.com",
     "message": "FOO",
-    "pop": "RIX",
+    "pop": "FLG",
     "ts": "2017-04-25T23:05:22.361Z"
   },
   "2017-04-25T23:05:22.363Z": {
     "_id": "2017-04-25T23:05:22.363Z",
-    "hostname": "some.host.name",
+    "hostname": "flg-01.logbus.com",
     "message": "BAR",
-    "pop": "RIX",
+    "pop": "FLG",
     "ts": "2017-04-25T23:05:22.363Z"
   },
   "2017-04-25T23:05:22.367Z": {
     "_id": "2017-04-25T23:05:22.367Z",
-    "hostname": "some.host.name",
+    "hostname": "flg-01.logbus.com",
     "message": "YEEE BOI!!!",
-    "pop": "RIX",
+    "pop": "FLG",
     "ts": "2017-04-25T23:05:22.367Z"
+  },
+  "YEEE!": {
+    "_id": "YEEE!",
+    "message": "Hi, Mom!"
   }
 }

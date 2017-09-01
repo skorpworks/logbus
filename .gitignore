@@ -1,13 +1,14 @@
 test/*/out.json
 .DS_Store
 .grunt
-.logagent-js
+.logbus
+.tern-port
 build
 config/test.yml
 coverage
 lib-cov
 maxmind-city.mmdb
 node_modules
-pkg/opt/logagent
+pkg/opt/logbus
 rpm
 shippers/*.rpm

@@ -7,4 +7,4 @@ ADD . /src
 RUN npm install -g
 RUN npm link
 
-CMD ["logagent", "/conf.yml"]
+CMD ["logbus", "/conf.yml"]
