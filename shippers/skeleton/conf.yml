@@ -57,11 +57,11 @@ pipeline:
           }
           if (!event._index) {
             if (event.type === 'stats') {
-              event._index = 'logagent.stats-' + event.ts.format('YYYY.MM')
+              event._index = 'logbus.stats-' + event.ts.format('YYYY.MM')
               event.type = 'sample'
             }
             else if (event.type === 'error') {
-              event._index = 'logagent.errors-' + event.ts.format('YYYY.MM')
+              event._index = 'logbus.errors-' + event.ts.format('YYYY.MM')
               event.type = 'sample'
             }
             else {
