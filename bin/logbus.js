@@ -32,7 +32,10 @@ var MODULES = {
   agg: '../lib/plugins/agg',
   cast: '../lib/plugins/cast',
   drop: '../lib/plugins/drop-fields',
-  elasticsearch: '../lib/plugins/output/elasticsearch',
+  // 'elasticsearch-in': '../lib/plugins/input/elasticsearch',
+  'elasticsearch-log': '../lib/plugins/elasticsearch',
+  'elasticsearch-out': '../lib/plugins/output/elasticsearch',
+  elasticsearch: '../lib/plugins/output/elasticsearch', // DEPRECATED
   errors: '../lib/plugins/errors',
   gc: '../lib/plugins/gc',
   geoip: '../lib/plugins/geoip',
@@ -148,8 +151,10 @@ var Stage = function(name, stage, pipeline, log) {
 }
 
 Stage.prototype.emitEvent = function(event) {
-  for (var outChannel of this.outChannels) {
-    this.pipeline.emit(outChannel, event)
+  if (event) {
+    for (var outChannel of this.outChannels) {
+      this.pipeline.emit(outChannel, event)
+    }
   }
 }
 
