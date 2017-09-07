@@ -36,6 +36,8 @@ var MODULES = {
   'elasticsearch-log': '../lib/plugins/elasticsearch',
   'elasticsearch-out': '../lib/plugins/output/elasticsearch',
   elasticsearch: '../lib/plugins/output/elasticsearch', // DEPRECATED
+  // 'kafka-in': '../lib/plugins/input/kafka',
+  'kafka-out': '../lib/plugins/output/kafka',
   errors: '../lib/plugins/errors',
   gc: '../lib/plugins/gc',
   geoip: '../lib/plugins/geoip',
@@ -296,7 +298,7 @@ LaCli.prototype.shutdown = function(reason) {
       stage.stop()
     }
   }
-  setInterval(this.reportOnShutdown.bind(this), 250)
+  setInterval(this.reportOnShutdown.bind(this), 1000)
   setTimeout(this.terminate.bind(this), 10000)
 }
 
