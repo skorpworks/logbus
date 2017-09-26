@@ -36,7 +36,7 @@ var MODULES = {
   'elasticsearch-log': '../lib/plugins/elasticsearch',
   'elasticsearch-out': '../lib/plugins/output/elasticsearch',
   elasticsearch: '../lib/plugins/output/elasticsearch', // DEPRECATED
-  // 'kafka-in': '../lib/plugins/input/kafka',
+  'kafka-in': '../lib/plugins/input/kafka',
   'kafka-out': '../lib/plugins/output/kafka',
   errors: '../lib/plugins/errors',
   gc: '../lib/plugins/gc',

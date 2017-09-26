@@ -1,0 +1,40 @@
+
+pipeline:
+
+  test-input:
+    module: file-in
+    config:
+      globs:
+        - test/kafka/test.log
+
+  lines:
+    inChannels:
+      - test-input
+
+  kafka-out:
+    inChannels:
+      - lines
+    outChannels: []
+    config:
+      hosts:
+        - localhost:9092
+      topic: logbus-test-2
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      interval: 5
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+
+  log:
+    inChannels:
+      - log
+      - log-errors
+      - log-stats
