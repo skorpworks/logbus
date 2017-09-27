@@ -41,6 +41,22 @@ test: node_modules ## run automated tests
 	  test -f $$dir/conf.yml && echo $$dir && ./bin/logbus.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
 	done
 
+
+# Not sure how I'd like this automated, so capturing a recipe here for now.
+test-kafka: ## test kafka plugins
+	@docker rm -f logbus-test-kafka > /dev/null 2> /dev/null || true
+	@docker run -d --name logbus-test-kafka -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka > /dev/null
+	@echo waiting for kafka to start...
+	@sleep 10
+	./bin/logbus.js -v warn test/kafka/producer.yml | bunyan -o short
+	./bin/logbus.js -v warn test/kafka/consumer.yml | bunyan -o short
+	@test 3 == $$(jq -s 'length' < test/kafka/out.json)
+	KAFKA_LIB=librd ./bin/logbus.js -v warn test/kafka/producer.yml | bunyan -o short
+	KAFKA_LIB=librd ./bin/logbus.js -v warn test/kafka/consumer.yml | bunyan -o short
+	@test 6 == $$(jq -s 'length' < test/kafka/out.json)
+	@docker rm -f logbus-test-kafka > /dev/null
+
+
 docker-build: Dockerfile ## build docker image
 	docker build -t $(DOCKER_TAG) .
 

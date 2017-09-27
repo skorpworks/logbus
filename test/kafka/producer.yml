@@ -17,8 +17,8 @@ pipeline:
     outChannels: []
     config:
       hosts:
-        - localhost:9092
-      topic: logbus-test-2
+        - 'localhost:9092'
+      topic: logbus-test
 
   log-errors:
     module: errors

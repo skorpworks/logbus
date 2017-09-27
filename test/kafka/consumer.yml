@@ -5,11 +5,11 @@ pipeline:
     config:
       hosts:
         - 'localhost:9092'
-      topic: logbus-test-2
+      topic: logbus-test
       groupId: test
       offset: earliest
       format: json
-      exitAfterSeconds: 1
+      exitAfterSeconds: 5
 
   # Remove variable & environment specific data and transform to format that is
   # easier for `jq` to produce deterministic results.
