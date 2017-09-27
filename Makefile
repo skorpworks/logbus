@@ -1,5 +1,4 @@
-.ONESHELL:
-.PHONY: help test docker-build docker-publish rpm-publish
+.PHONY: help test test-kafka docker-build docker-publish rpm-publish
 .DEFAULT_GOAL := help
 
 SHELL := /bin/bash
@@ -28,6 +27,7 @@ help: ## show target summary
 
 node_modules: package.json ## install dependencies
 	npm install
+	touch node_modules
 
 start: VERBOSITY=info# log level
 start: CONF=config/test.yml# logbus config file
@@ -36,7 +36,7 @@ start: node_modules ## start logbus
 
 
 test: node_modules ## run automated tests
-	diff -U2 test/dead-ends/out.txt <(./bin/logbus.js -c test/dead-ends/conf.yml)
+	diff -U2 test/dead-ends/out.txt <(./bin/logbus.js -c test/dead-ends/conf.yml 2>/dev/null)
 	for dir in $$(ls -d test/* | grep -v dead-ends); do \
 	  test -f $$dir/conf.yml && echo $$dir && ./bin/logbus.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
 	done
@@ -45,7 +45,7 @@ test: node_modules ## run automated tests
 # Not sure how I'd like this automated, so capturing a recipe here for now.
 test-kafka: ## test kafka plugins
 	@docker rm -f logbus-test-kafka > /dev/null 2> /dev/null || true
-	@docker run -d --name logbus-test-kafka -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka > /dev/null
+	@docker run -d --name logbus-test-kafka -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
 	@echo waiting for kafka to start...
 	@sleep 10
 	./bin/logbus.js -v warn test/kafka/producer.yml | bunyan -o short

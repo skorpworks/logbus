@@ -14,6 +14,13 @@ Options:
     Validate pipeline
 `
 
+// Exit non-success on unhandled exception, particularly useful so supervisors
+// can restart the service when configured to do so.
+process.on('uncaughtException', function (err) {
+  console.error(err)
+  process.exit(42)
+})
+
 const EventEmitter = require('eventemitter3')
 const util = require('util')
 const lodash = require('lodash')
@@ -71,9 +78,16 @@ function CLI() {
     this.loadPlugins(path.resolve(path.dirname(argv['<config>'])), config.plugins)
   }
   this.loadPipeline(config.pipeline)
+  var invalid = {}
   for (var stages of this.pipelinePaths()) {
     var start = stages.shift()
     var end = stages.pop() || start
+    if (start.reason === 'DEADEND') {
+      invalid[start.name] = 'DEADEND'
+    }
+    if (end.reason === 'DEADEND') {
+      invalid[end.name] = 'DEADEND'
+    }
     if (argv['--check']) {
       console.log()
       console.log(start.reason, ':', start.name)
@@ -82,9 +96,9 @@ function CLI() {
       }
       console.log(end.reason, ':', end.name)
     }
-    else if ([start.reason, end.reason].indexOf('DEADEND') !== -1) {
-      throw new Error('stage has dead ends: ' + start.name)
-    }
+  }
+  if (Object.keys(invalid).length > 0) {
+    throw new Error('invalid stages: ' + JSON.stringify(invalid, null, 2))
   }
   if (! argv['--check']) {
     this.startPipeline()
