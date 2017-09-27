@@ -55,7 +55,7 @@ var MODULES = {
   stdout: '../lib/plugins/output/stdout'
 }
 
-function LaCli () {
+function CLI() {
   var bunyan = require('bunyan')
   var argv = require('docopt').docopt(USAGE)
   var config = require('js-yaml').load(require('fs').readFileSync(argv['<config>'], 'utf8'));
@@ -91,7 +91,7 @@ function LaCli () {
   }
 }
 
-LaCli.prototype.loadPlugins = function(basedir, plugins) {
+CLI.prototype.loadPlugins = function(basedir, plugins) {
   for (var name in plugins) {
     MODULES[name] = plugins[name].path
     if (MODULES[name][0] !== '/') {
@@ -100,7 +100,7 @@ LaCli.prototype.loadPlugins = function(basedir, plugins) {
   }
 }
 
-LaCli.prototype.loadPipeline = function(stages) {
+CLI.prototype.loadPipeline = function(stages) {
   this.stages = {}
   for (var name in stages) {
     var props = stages[name]
@@ -213,7 +213,7 @@ Stage.prototype.outputs = function(stages) {
   return matches
 }
 
-LaCli.prototype.pipelinePaths = function() {
+CLI.prototype.pipelinePaths = function() {
   // Scope for closures since bind() on a generator returns a normal function.
   var stages = this.stages
   // Generate all paths that end here.
@@ -274,7 +274,7 @@ LaCli.prototype.pipelinePaths = function() {
   return paths
 }
 
-LaCli.prototype.startPipeline = function() {
+CLI.prototype.startPipeline = function() {
   for (var name in this.stages) {
     try {
       var stage = this.stages[name]
@@ -289,7 +289,7 @@ LaCli.prototype.startPipeline = function() {
   }
 }
 
-LaCli.prototype.shutdown = function(reason) {
+CLI.prototype.shutdown = function(reason) {
   this.log.info({reason: reason}, 'shutting down')
   // Stop all input, error, & stats channels.  Dependent stages should follow.
   for (var name in this.stages) {
@@ -302,7 +302,7 @@ LaCli.prototype.shutdown = function(reason) {
   setTimeout(this.terminate.bind(this), 10000)
 }
 
-LaCli.prototype.reportOnShutdown = function() {
+CLI.prototype.reportOnShutdown = function() {
   var shutdown = true
   for (var name in this.stages) {
     var stage = this.stages[name]
@@ -317,14 +317,14 @@ LaCli.prototype.reportOnShutdown = function() {
   }
 }
 
-LaCli.prototype.terminate = function() {
+CLI.prototype.terminate = function() {
   this.log.error('timed out waiting for pipeline to shut down') 
   process.exit(2)
 }
 
 if (require.main === module) {
-  var logbus = new LaCli()
+  var logbus = new CLI()
 }
 else {
-  module.exports = LaCli
+  module.exports = CLI
 }
