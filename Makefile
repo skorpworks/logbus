@@ -1,4 +1,4 @@
-.PHONY: help test test-kafka docker-build docker-publish rpm-publish
+.PHONY: help test test-kafka test-tail docker-build docker-publish rpm-publish
 .DEFAULT_GOAL := help
 
 SHELL := /bin/bash
@@ -55,6 +55,12 @@ test-kafka: ## test kafka plugins
 	KAFKA_LIB=librd ./bin/logbus.js -v warn test/kafka/consumer.yml | bunyan -o short
 	@test 6 == $$(jq -s 'length' < test/kafka/out.json)
 	@docker rm -f logbus-test-kafka > /dev/null
+
+
+# Not sure how I'd like this automated, so capturing a recipe here for now.
+test-tail: ## test tail plugin
+	./bin/logbus.js -v debug test/tail/play.yml | bunyan -o short
+	jq '.' test/tail/play.db
 
 
 docker-build: Dockerfile ## build docker image

@@ -16,6 +16,7 @@ Options:
 
 // Exit non-success on unhandled exception, particularly useful so supervisors
 // can restart the service when configured to do so.
+// TODO: should attempt a clean shutdown first
 process.on('uncaughtException', function (err) {
   console.error(err)
   process.exit(42)
@@ -71,6 +72,7 @@ function CLI() {
   this.pipeline = new EventEmitter()
   // Stages will use `SIGTERM` event to signal pipeline to shut down.
   this.pipeline.on('SIGTERM', this.shutdown.bind(this))
+  // process.on('exit', this.shutdown.bind(this, 'EXIT'))
   process.once('SIGINT', this.shutdown.bind(this, 'SIGINT'))
   process.once('SIGQUIT', this.shutdown.bind(this, 'SIGQUIT'))
   process.once('SIGTERM', this.shutdown.bind(this, 'SIGTERM'))
@@ -304,7 +306,7 @@ CLI.prototype.startPipeline = function() {
 }
 
 CLI.prototype.shutdown = function(reason) {
-  this.log.info({reason: reason}, 'shutting down')
+  this.log.info('shutting down', {reason: reason})
   // Stop all input, error, & stats channels.  Dependent stages should follow.
   for (var name in this.stages) {
     var stage = this.stages[name]
