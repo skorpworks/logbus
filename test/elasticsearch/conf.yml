@@ -15,6 +15,15 @@ pipeline:
     module: elasticsearch-log
     inChannels:
       - lines
+    config:
+      parser:
+        - '^\[(\S+)\]\s*\[(\S+)\s*\]\s*\[(\S+)\]\s*\[(\S+)\]\s*(.+)$' 
+        - name: ts
+          timestamp: 'YYYY-MM-DDThh:mm:ss,SSS'
+        - name: severity
+        - name: logger
+        - name: node
+        - name: message
 
   # Mark which events should be rolled up.
   rollup:
@@ -25,9 +34,11 @@ pipeline:
       function: !!js/function >-
         function(event) {
           if (event.exception) {
-            event._agg = {type: 'count', key: event.exception.msg}
+            event._agg = {type: 'count', key: event.exception}
           }
-          // TODO: potentially verbose non-exceptions (eg deprecation warrnings during index)
+          else if (event.logger.match(/(deprecation|^o\.e\.d)/)) {
+            event._agg = {type: 'count', key: event.message}
+          }
           return event
         }
 
@@ -73,7 +84,14 @@ pipeline:
           event.end = events[events.length-1].ts
           event.duration = Math.round((event.end - event.ts) / 1000)
           event.count = events.length
-          event.message = this.util.format('%dx: %s', event.count, event._agg.key)
+          if (event.exception) {
+            // Preserve message & exception. 
+            event.message = this.util.format('%dx: %s', event.count, event.message)
+          }
+          else {
+            // Assume original message in aggregation key.
+            event.message = this.util.format('%dx: %s', event.count, event._agg.key)
+          }
           delete event._agg
           return event
         }
