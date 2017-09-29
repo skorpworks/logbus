@@ -1,4 +1,4 @@
-.PHONY: help test test-kafka test-tail docker-build docker-publish rpm-publish
+.PHONY: help test test-kafka test-tail coverage docker-build docker-publish rpm-publish
 .DEFAULT_GOAL := help
 
 SHELL := /bin/bash
@@ -12,6 +12,8 @@ DOCKER_TAG := $(DOCKER_REPO)logbus
 
 YUM_SERVER := yum.server
 YUM_REPO := /opt/yum
+
+NODE_BIN := $(shell npm bin)
 
 
 help: ## show target summary
@@ -32,14 +34,22 @@ node_modules: package.json ## install dependencies
 start: VERBOSITY=info# log level
 start: CONF=config/test.yml# logbus config file
 start: node_modules ## start logbus
-	node bin/logbus.js -v $(VERBOSITY) $(CONF) -c
+	./index.js -v $(VERBOSITY) $(CONF) -c
 
 
 test: node_modules ## run automated tests
-	diff -U2 test/dead-ends/out.txt <(./bin/logbus.js -c test/dead-ends/conf.yml 2>/dev/null)
-	for dir in $$(ls -d test/* | grep -v dead-ends); do \
-	  test -f $$dir/conf.yml && echo $$dir && ./bin/logbus.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
+	@diff -U2 test/dead-ends/out.txt <(./index.js -c test/dead-ends/conf.yml 2>/dev/null)
+	@for dir in $$(ls -d test/* | grep -v dead-ends); do \
+	  if test -f $$dir/conf.yml; then \
+	    echo $$dir; \
+	    ./index.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
+	  fi; \
 	done
+
+
+coverage: ## record coverage metrics
+	$(NODE_BIN)/nyc -n *.js -n lib make test
+	$(NODE_BIN)/nyc report --reporter=html
 
 
 # Not sure how I'd like this automated, so capturing a recipe here for now.
@@ -48,18 +58,18 @@ test-kafka: ## test kafka plugins
 	@docker run -d --name logbus-test-kafka -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
 	@echo waiting for kafka to start...
 	@sleep 10
-	./bin/logbus.js -v warn test/kafka/producer.yml | bunyan -o short
-	./bin/logbus.js -v warn test/kafka/consumer.yml | bunyan -o short
+	./index.js -v warn test/kafka/producer.yml | bunyan -o short
+	./index.js -v warn test/kafka/consumer.yml | bunyan -o short
 	@test 3 == $$(jq -s 'length' < test/kafka/out.json)
-	KAFKA_LIB=librd ./bin/logbus.js -v warn test/kafka/producer.yml | bunyan -o short
-	KAFKA_LIB=librd ./bin/logbus.js -v warn test/kafka/consumer.yml | bunyan -o short
+	KAFKA_LIB=librd ./index.js -v warn test/kafka/producer.yml | bunyan -o short
+	KAFKA_LIB=librd ./index.js -v warn test/kafka/consumer.yml | bunyan -o short
 	@test 6 == $$(jq -s 'length' < test/kafka/out.json)
 	@docker rm -f logbus-test-kafka > /dev/null
 
 
 # Not sure how I'd like this automated, so capturing a recipe here for now.
 test-tail: ## test tail plugin
-	./bin/logbus.js -v debug test/tail/play.yml | bunyan -o short
+	./index.js -v debug test/tail/play.yml | bunyan -o short
 	jq '.' test/tail/play.db
 
 
@@ -71,6 +81,9 @@ docker-publish: ## publish docker image to repo
 	docker push $(DOCKER_TAG)
 
 
+lint: ## check code for errors
+	$(NODE_BIN)/eslint lib *.js
+
 # Experiment with other container runtimes:
 #
 # pkg/opt/logbus/rootfs: docker-build ## build rootfs
@@ -81,11 +94,11 @@ docker-publish: ## publish docker image to repo
 
 
 RELEASE := $(shell echo $$(( $$(rpm -qp --qf %{RELEASE} rpm 2>/dev/null) + 1)))
-rpm: Makefile lib bin node_modules ## build rpm
+rpm: Makefile lib index.js node_modules ## build rpm
 	rsync -va package.json pkg/opt/logbus/package.json
 	rsync -va --exclude test/ --exclude alasql/utils/ node_modules/ --delete-excluded pkg/opt/logbus/node_modules/
 	rsync -va lib/ pkg/opt/logbus/lib/
-	rsync -va bin/ pkg/opt/logbus/bin/
+	rsync -va index.js pkg/opt/logbus/bin/logbus
 	cp node_modules/.bin/bunyan pkg/opt/logbus/bin/
 	fpm --force --rpm-os linux -s dir -t rpm -C pkg --package rpm --name $(NAME) \
 	  --version $(VERSION) --iteration $(RELEASE) \
