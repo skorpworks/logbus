@@ -1,20 +1,38 @@
 
 pipeline:
 
-  test-input:
+  default-input:
+    module: file-in
+    config:
+      globs:
+        - test/elasticsearch/corrupt.log
+        - test/elasticsearch/multiline.log
+
+  custom-input:
     module: file-in
     config:
       globs:
         - test/elasticsearch/test.log
 
-  lines:
+  default-lines:
+    module: lines
     inChannels:
-      - test-input
+      - default-input
 
-  parse:
+  custom-lines:
+    module: lines
+    inChannels:
+      - custom-input
+
+  default-parser:
     module: elasticsearch-log
     inChannels:
-      - lines
+      - default-lines
+
+  custom-parser:
+    module: elasticsearch-log
+    inChannels:
+      - custom-lines
     config:
       parser:
         - '^\[(\S+)\]\s*\[(\S+)\s*\]\s*\[(\S+)\]\s*\[(\S+)\]\s*(.+)$' 
@@ -29,14 +47,16 @@ pipeline:
   rollup:
     module: js
     inChannels:
-      - parse
+      - default-parser
+      - custom-parser
     config:
       function: !!js/function >-
         function(event) {
           if (event.exception) {
-            event._agg = {type: 'count', key: event.exception}
+            event._agg = {type: 'count', key: event.exception.type}
           }
           else if (event.logger.match(/(deprecation|^o\.e\.d)/)) {
+            event.deprecation = true
             event._agg = {type: 'count', key: event.message}
           }
           return event
@@ -87,6 +107,7 @@ pipeline:
           if (event.exception) {
             // Preserve message & exception. 
             event.message = this.util.format('%dx: %s', event.count, event.message)
+            event.exception.stack = event.exception.stack.slice(0, 5)
           }
           else {
             // Assume original message in aggregation key.
