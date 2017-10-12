@@ -12,13 +12,13 @@ RUN if test -n "${KAFKA}"; then \
     fi
 
 ARG ELASTICSEARCH
-RUN if test -n "${ELASTICSEARCH}"; then npm install elasticsearch@13.0.1; fi
+RUN if test -n "${ELASTICSEARCH}"; then npm install -g elasticsearch@13.0.1; fi
 
 ARG ALASQL
-RUN if test -n "${ALASQL}"; then npm install alasql@0.3.3; fi
+RUN if test -n "${ALASQL}"; then npm install -g alasql@0.3.3; fi
 
 ARG MAXMIND
-RUN if test -n "${MAXMIND}"; then npm install maxmind-db-reader@0.2.1; fi
+RUN if test -n "${MAXMIND}"; then npm install -g maxmind-db-reader@0.2.1; fi
 
 ADD . /opt/logbus
 
