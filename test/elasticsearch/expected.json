@@ -1,14 +1,49 @@
 {
+  "2017-07-23T02:18:26.551Z": {
+    "logger": "org.elasticsearch.discovery.zen.ZenDiscovery",
+    "message": "master_left [{master-1}{foo}{bar}{10.44.0.101}{10.44.0.101:9300}{ml.max_open_jobs=10, rack=r8, ml.enabled=true}], reason [shut_down]",
+    "severity": "INFO",
+    "ts": "2017-07-23T02:18:26.551Z"
+  },
+  "2017-07-23T02:20:37.885Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2017-07-23T02:20:37.885Z",
+    "exception": {
+      "message": "GET http://10.44.0.101:9201/?filter_path=version.number: HTTP/1.1 503 Service Unavailable\n{\n  \"version\" : {\n    \"number\" : \"5.6.1\"\n  }\n}",
+      "stack": [
+        "        at org.elasticsearch.client.RestClient$1.completed(RestClient.java:354) ~[?:?]",
+        "        at org.elasticsearch.client.RestClient$1.completed(RestClient.java:343) ~[?:?]",
+        "        at org.apache.http.concurrent.BasicFuture.completed(BasicFuture.java:119) ~[?:?]",
+        "        at org.apache.http.impl.nio.client.DefaultClientExchangeHandlerImpl.responseCompleted(DefaultClientExchangeHandlerImpl.java:177) ~[?:?]",
+        "        at org.apache.http.nio.protocol.HttpAsyncRequestExecutor.processResponse(HttpAsyncRequestExecutor.java:436) ~[?:?]"
+      ],
+      "type": "org.elasticsearch.client.ResponseException"
+    },
+    "logger": "org.elasticsearch.xpack.monitoring.exporter.http.VersionHttpResource",
+    "message": "1x: failed to verify minimum version [5.0.0-beta1] on the [xpack.monitoring.exporters.id1] monitoring cluster",
+    "severity": "ERROR",
+    "ts": "2017-07-23T02:20:37.885Z"
+  },
   "2017-08-09T20:02:29.382Z": {
     "count": 2,
     "duration": 360,
     "end": "2017-08-09T20:08:29.382Z",
-    "exception": "org.elasticsearch.ElasticsearchException$1:  Fielddata is disabled on text fields by default. Set fielddata=true on [name] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead.",
+    "exception": {
+      "message": "Fielddata is disabled on text fields by default. Set fielddata=true on [name] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead.",
+      "stack": [
+        "\tat org.elasticsearch.ElasticsearchException.guessRootCauses(ElasticsearchException.java:618) ~[elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.action.search.AbstractSearchAsyncAction.executeNextPhase(AbstractSearchAsyncAction.java:125) [elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.action.search.AbstractSearchAsyncAction.onPhaseDone(AbstractSearchAsyncAction.java:240) [elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.action.search.InitialSearchPhase.onShardFailure(InitialSearchPhase.java:88) [elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.action.search.InitialSearchPhase.access$100(InitialSearchPhase.java:47) [elasticsearch-5.5.0.jar:5.5.0]"
+      ],
+      "type": "org.elasticsearch.ElasticsearchException$1"
+    },
     "logger": "o.e.a.s.TransportSearchAction",
     "message": "2x: All shards failed for phase: [query]",
     "node": "lappy",
     "severity": "DEBUG",
-    "stack": "at org.elasticsearch.ElasticsearchException.guessRootCauses(ElasticsearchException.java:618) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.search.AbstractSearchAsyncAction.executeNextPhase(AbstractSearchAsyncAction.java:125) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.search.AbstractSearchAsyncAction.onPhaseDone(AbstractSearchAsyncAction.java:240) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.search.InitialSearchPhase.onShardFailure(InitialSearchPhase.java:88) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.search.InitialSearchPhase.access$100(InitialSearchPhase.java:47) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.search.InitialSearchPhase$1.onFailure(InitialSearchPhase.java:156) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.ActionListenerResponseHandler.handleException(ActionListenerResponseHandler.java:51) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.transport.TransportService$ContextRestoreResponseHandler.handleException(TransportService.java:1067) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.transport.TransportService$DirectResponseChannel.processException(TransportService.java:1171) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.transport.TransportService$DirectResponseChannel.sendResponse(TransportService.java:1149) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.transport.TransportService$7.onFailure(TransportService.java:655) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.common.util.concurrent.ThreadContext$ContextPreservingAbstractRunnable.onFailure(ThreadContext.java:623) [elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.common.util.concurrent.AbstractRunnable.run(AbstractRunnable.java:39) [elasticsearch-5.5.0.jar:5.5.0]\nat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142) [?:1.8.0_131]\nat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617) [?:1.8.0_131]\nat java.lang.Thread.run(Thread.java:748) [?:1.8.0_131]\nCaused by: java.lang.IllegalArgumentException: Fielddata is disabled on text fields by default. Set fielddata=true on [name] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory. Alternatively use a keyword field instead.\nat org.elasticsearch.index.mapper.TextFieldMapper$TextFieldType.fielddataBuilder(TextFieldMapper.java:336) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.index.fielddata.IndexFieldDataService.getForField(IndexFieldDataService.java:111) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.index.query.QueryShardContext.getForField(QueryShardContext.java:166) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.aggregations.support.ValuesSourceConfig.resolve(ValuesSourceConfig.java:96) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.aggregations.support.ValuesSourceAggregationBuilder.resolveConfig(ValuesSourceAggregationBuilder.java:297) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.aggregations.support.ValuesSourceAggregationBuilder.doBuild(ValuesSourceAggregationBuilder.java:290) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.aggregations.support.ValuesSourceAggregationBuilder.doBuild(ValuesSourceAggregationBuilder.java:39) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.aggregations.AbstractAggregationBuilder.build(AbstractAggregationBuilder.java:126) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.aggregations.AggregatorFactories$Builder.build(AggregatorFactories.java:333) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.SearchService.parseSource(SearchService.java:651) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.SearchService.createContext(SearchService.java:481) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.SearchService.createAndPutContext(SearchService.java:457) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.search.SearchService.executeQueryPhase(SearchService.java:253) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.search.SearchTransportService$6.messageReceived(SearchTransportService.java:330) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.action.search.SearchTransportService$6.messageReceived(SearchTransportService.java:327) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.transport.RequestHandlerRegistry.processMessageReceived(RequestHandlerRegistry.java:69) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.transport.TransportService$7.doRun(TransportService.java:644) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.common.util.concurrent.ThreadContext$ContextPreservingAbstractRunnable.doRun(ThreadContext.java:638) ~[elasticsearch-5.5.0.jar:5.5.0]\nat org.elasticsearch.common.util.concurrent.AbstractRunnable.run(AbstractRunnable.java:37) ~[elasticsearch-5.5.0.jar:5.5.0]\n... 3 more",
     "ts": "2017-08-09T20:02:29.382Z"
   },
   "2017-08-09T20:05:52.975Z": {
@@ -32,8 +67,35 @@
     "severity": "INFO",
     "ts": "2017-08-09T20:07:55.874Z"
   },
+  "2017-09-15T19:30:28.925Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2017-09-15T19:30:28.925Z",
+    "exception": {
+      "message": "Fetch Failed [Failed to fetch doc id [abc123]]\n\ty: org.apache.lucene.index.CorruptIndexException: Corrupted: docID=abc123, docBase=0, chunkDocs=0, numDocs=55 (resource=MMapIndexInput(path=\"/var/elasticsearch/nodes/0/indices/Bj1swrdnS4uIlFvpEm6_Tg/42/index/_18nxi.fdt\"))",
+      "stack": [
+        "\tat org.elasticsearch.search.fetch.FetchPhase.loadStoredFields(FetchPhase.java:349) ~[elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.search.fetch.FetchPhase.createSearchHit(FetchPhase.java:186) ~[elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.search.fetch.FetchPhase.execute(FetchPhase.java:152) ~[elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.search.SearchService.executeFetchPhase(SearchService.java:422) ~[elasticsearch-5.5.0.jar:5.5.0]",
+        "\tat org.elasticsearch.action.search.SearchTransportService$12.messageReceived(SearchTransportService.java:393) ~[elasticsearch-5.5.0.jar:5.5.0]"
+      ],
+      "type": "org.elasticsearch.search.fetch.FetchPhaseExecutionException"
+    },
+    "logger": "org.elasticsearch.cluster.action.shard.ShardStateAction",
+    "message": "1x: [some-index][42] received shard failed for shard id [[some-index][42]], allocation id [Fo2N30b3SEGvyUGIe00OGA], primary term [0], message [shard failure, reason [search execution corruption failure]], failure [FetchPhaseExecutionException[Fetch Failed [Failed to fetch doc id [abc123]]]; nested: CorruptIndexException[Corrupted: docID=abc123, docBase=0, chunkDocs=0, numDocs=55 (resource=MMapIndexInput(path=\"/var/elasticsearch/nodes/0/indices/Bj1swrdnS4uIlFvpEm6_Tg/42/index/_18nxi.fdt\"))]; ]",
+    "severity": "WARN",
+    "ts": "2017-09-15T19:30:28.925Z"
+  },
+  "2017-09-23T02:18:26.553Z": {
+    "logger": "org.elasticsearch.discovery.zen.ZenDiscovery",
+    "message": "master left (reason = shut_down), current nodes: nodes:\n\n{master-2}{yeee}{boye}{10.44.0.100}{10.44.0.100:9300}{ml.max_open_jobs=10, rack=r42, ml.enabled=true}, master\n{data-1}{pea}{nut}{10.44.0.106}{10.44.0.106:9300}{ml.max_open_jobs=10, rack=r42, ml.enabled=true}",
+    "severity": "WARN",
+    "ts": "2017-09-23T02:18:26.553Z"
+  },
   "2017-09-28T21:46:56.196Z": {
     "count": 4,
+    "deprecation": true,
     "duration": 0,
     "end": "2017-09-28T21:46:56.199Z",
     "logger": "o.e.d.i.m.BooleanFieldMapper",
@@ -44,6 +106,7 @@
   },
   "2017-09-28T21:46:56.383Z": {
     "count": 3,
+    "deprecation": true,
     "duration": 2,
     "end": "2017-09-28T21:46:58.583Z",
     "logger": "o.e.d.r.RestController",
