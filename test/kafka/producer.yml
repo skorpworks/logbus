@@ -14,11 +14,13 @@ pipeline:
   kafka-out:
     inChannels:
       - lines
-    outChannels: []
     config:
       hosts:
         - 'localhost:9092'
       topic: logbus-test
+      debug: broker,topic,msg
+      interval: 100
+      compression: gzip
 
   log-errors:
     module: errors

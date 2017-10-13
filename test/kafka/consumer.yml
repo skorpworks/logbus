@@ -5,11 +5,15 @@ pipeline:
     config:
       hosts:
         - 'localhost:9092'
-      topic: logbus-test
+      topics:
+        - logbus-test
       groupId: test
       offset: earliest
       format: json
+      compression: gzip
+      debug: cgrp,topic,fetch
       exitAfterSeconds: 5
+      interval: 100
 
   # Remove variable & environment specific data and transform to format that is
   # easier for `jq` to produce deterministic results.
