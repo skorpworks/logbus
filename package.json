@@ -32,13 +32,10 @@
   "homepage": "https://github.com/skorpworks/logbus",
   "license": "Apache-2.0",
   "dependencies": {
-    "alasql": "^0.3.3",
     "bunyan": "^1.8.5",
     "docopt": "^0.6.2",
-    "elasticsearch": "^13.0.1",
     "eventemitter3": "^1.2.0",
     "js-yaml": "^3.3.1",
-    "maxmind-db-reader": "^0.2.1",
     "moment": "^2.10.3",
     "object-sizeof": "^1.1.1",
     "simple-get": "^2.4.0",
@@ -47,5 +44,15 @@
     "sync-request": "^4.0.3",
     "tail-forever": "^0.3.13"
   },
-  "devDependencies": {}
+  "optionalDependencies": {
+    "alasql": "^0.3.3",
+    "elasticsearch": "^13.0.1",
+    "kafka-node": "^2.2.3",
+    "maxmind-db-reader": "^0.2.1",
+    "node-rdkafka": "^2.0.0"
+  },
+  "devDependencies": {
+    "istanbul-diff": "^1.1.4",
+    "nyc": "^11.2.1"
+  }
 }

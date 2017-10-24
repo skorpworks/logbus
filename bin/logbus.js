@@ -14,6 +14,14 @@ Options:
     Validate pipeline
 `
 
+// Exit non-success on unhandled exception, particularly useful so supervisors
+// can restart the service when configured to do so.
+// TODO: should attempt a clean shutdown first
+process.on('uncaughtException', function (err) {
+  console.error(err)
+  process.exit(42)
+})
+
 const EventEmitter = require('eventemitter3')
 const util = require('util')
 const lodash = require('lodash')
@@ -36,6 +44,8 @@ var MODULES = {
   'elasticsearch-log': '../lib/plugins/elasticsearch',
   'elasticsearch-out': '../lib/plugins/output/elasticsearch',
   elasticsearch: '../lib/plugins/output/elasticsearch', // DEPRECATED
+  'kafka-in': '../lib/plugins/input/kafka',
+  'kafka-out': '../lib/plugins/output/kafka',
   errors: '../lib/plugins/errors',
   gc: '../lib/plugins/gc',
   geoip: '../lib/plugins/geoip',
@@ -53,7 +63,7 @@ var MODULES = {
   stdout: '../lib/plugins/output/stdout'
 }
 
-function LaCli () {
+function CLI() {
   var bunyan = require('bunyan')
   var argv = require('docopt').docopt(USAGE)
   var config = require('js-yaml').load(require('fs').readFileSync(argv['<config>'], 'utf8'));
@@ -62,6 +72,7 @@ function LaCli () {
   this.pipeline = new EventEmitter()
   // Stages will use `SIGTERM` event to signal pipeline to shut down.
   this.pipeline.on('SIGTERM', this.shutdown.bind(this))
+  // process.on('exit', this.shutdown.bind(this, 'EXIT'))
   process.once('SIGINT', this.shutdown.bind(this, 'SIGINT'))
   process.once('SIGQUIT', this.shutdown.bind(this, 'SIGQUIT'))
   process.once('SIGTERM', this.shutdown.bind(this, 'SIGTERM'))
@@ -69,9 +80,16 @@ function LaCli () {
     this.loadPlugins(path.resolve(path.dirname(argv['<config>'])), config.plugins)
   }
   this.loadPipeline(config.pipeline)
+  var invalid = {}
   for (var stages of this.pipelinePaths()) {
     var start = stages.shift()
     var end = stages.pop() || start
+    if (start.reason === 'DEADEND') {
+      invalid[start.name] = 'DEADEND'
+    }
+    if (end.reason === 'DEADEND') {
+      invalid[end.name] = 'DEADEND'
+    }
     if (argv['--check']) {
       console.log()
       console.log(start.reason, ':', start.name)
@@ -80,16 +98,16 @@ function LaCli () {
       }
       console.log(end.reason, ':', end.name)
     }
-    else if ([start.reason, end.reason].indexOf('DEADEND') !== -1) {
-      throw new Error('stage has dead ends: ' + start.name)
-    }
+  }
+  if (Object.keys(invalid).length > 0) {
+    throw new Error('invalid stages: ' + JSON.stringify(invalid, null, 2))
   }
   if (! argv['--check']) {
     this.startPipeline()
   }
 }
 
-LaCli.prototype.loadPlugins = function(basedir, plugins) {
+CLI.prototype.loadPlugins = function(basedir, plugins) {
   for (var name in plugins) {
     MODULES[name] = plugins[name].path
     if (MODULES[name][0] !== '/') {
@@ -98,7 +116,7 @@ LaCli.prototype.loadPlugins = function(basedir, plugins) {
   }
 }
 
-LaCli.prototype.loadPipeline = function(stages) {
+CLI.prototype.loadPipeline = function(stages) {
   this.stages = {}
   for (var name in stages) {
     var props = stages[name]
@@ -211,7 +229,7 @@ Stage.prototype.outputs = function(stages) {
   return matches
 }
 
-LaCli.prototype.pipelinePaths = function() {
+CLI.prototype.pipelinePaths = function() {
   // Scope for closures since bind() on a generator returns a normal function.
   var stages = this.stages
   // Generate all paths that end here.
@@ -272,7 +290,7 @@ LaCli.prototype.pipelinePaths = function() {
   return paths
 }
 
-LaCli.prototype.startPipeline = function() {
+CLI.prototype.startPipeline = function() {
   for (var name in this.stages) {
     try {
       var stage = this.stages[name]
@@ -287,8 +305,8 @@ LaCli.prototype.startPipeline = function() {
   }
 }
 
-LaCli.prototype.shutdown = function(reason) {
-  this.log.info({reason: reason}, 'shutting down')
+CLI.prototype.shutdown = function(reason) {
+  this.log.info('shutting down', {reason: reason})
   // Stop all input, error, & stats channels.  Dependent stages should follow.
   for (var name in this.stages) {
     var stage = this.stages[name]
@@ -296,11 +314,11 @@ LaCli.prototype.shutdown = function(reason) {
       stage.stop()
     }
   }
-  setInterval(this.reportOnShutdown.bind(this), 250)
+  setInterval(this.reportOnShutdown.bind(this), 1000)
   setTimeout(this.terminate.bind(this), 10000)
 }
 
-LaCli.prototype.reportOnShutdown = function() {
+CLI.prototype.reportOnShutdown = function() {
   var shutdown = true
   for (var name in this.stages) {
     var stage = this.stages[name]
@@ -315,14 +333,14 @@ LaCli.prototype.reportOnShutdown = function() {
   }
 }
 
-LaCli.prototype.terminate = function() {
+CLI.prototype.terminate = function() {
   this.log.error('timed out waiting for pipeline to shut down') 
   process.exit(2)
 }
 
 if (require.main === module) {
-  var logbus = new LaCli()
+  var logbus = new CLI()
 }
 else {
-  module.exports = LaCli
+  module.exports = CLI
 }

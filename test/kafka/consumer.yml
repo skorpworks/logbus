@@ -1,0 +1,55 @@
+
+pipeline:
+
+  kafka-in:
+    config:
+      hosts:
+        - 'localhost:9092'
+      topic: logbus-test
+      groupId: test
+      offset: earliest
+      format: json
+      exitAfterSeconds: 5
+
+  # Remove variable & environment specific data and transform to format that is
+  # easier for `jq` to produce deterministic results.
+  testify:
+    module: js
+    inChannels:
+      - kafka-in
+    config:
+      function: !!js/function >-
+        function(event) {
+          return {key: event.ts, value: event}
+        }
+
+  json-output:
+    module: json-out
+    inChannels:
+      - testify
+
+  test-output:
+    module: file-out
+    inChannels:
+      - json-output
+    config:
+      path: test/kafka/out.json
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      interval: 5
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+
+  log:
+    inChannels:
+      - log
+      - log-errors
+      - log-stats
