@@ -17,7 +17,10 @@ pipeline:
     config:
       hosts:
         - 'localhost:9092'
-      topic: logbus-test
+      topic: !!js/function >-
+        function(event) {
+          return event.y % 2 === 0 ? 'even' : 'odd'
+        }
       debug: broker,topic,msg
       interval: 100
       compression: gzip
