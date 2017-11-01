@@ -1,26 +1,13 @@
 
-FROM node:6
+FROM node:6-alpine
 
 ARG KAFKA
 RUN if test -n "${KAFKA}"; then \
-      apt-get update && \
-      apt-get install -y build-essential python-dev bash && \
-      apt-get autoremove -y && \
-      apt-get clean -y && \
-      rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
-      # apk add --update git alpine-sdk python-dev bash && \
-      # mkdir -p /opt && cd /opt && \
-      # git clone -b v2.1.1 --recursive https://github.com/Blizzard/node-rdkafka.git; \
+      apk add --update git alpine-sdk python-dev zlib-dev bash && \
+      cd /opt && git clone -b v2.1.1 --recursive https://github.com/Blizzard/node-rdkafka.git; \
     fi
 RUN if test -n "${KAFKA}"; then \
-      npm install -g --unsafe node-rdkafka@2.1.1; \
-      # Trying to disable ssl, sasl, lz4 until I figure out how to do it more properly.  Doesn't work :(
-      #
-      # apk add --update lz4-dev openssl-dev && \
-      # cd /opt/node-rdkafka && \
-      # sed -i'' -e 's#./configure#./configure --enable-ssl --disable-sasl#' util/configure.js && \
-      # # sed -i'' -e "s#, '-lcrypto'##" deps/librdkafka.gyp && \
-      # npm install -g --unsafe; \
+      cd /opt/node-rdkafka && sed -i'' -E -e "s#-l(crypto|ssl)#-lz#g" deps/librdkafka.gyp && npm install -g --unsafe; \
     fi
 
 ARG ELASTICSEARCH
