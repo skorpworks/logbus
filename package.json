@@ -35,6 +35,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.10.3",
     "object-sizeof": "^1.1.1",
+    "safe-buffer": "^5.1.1",
     "simple-get": "^2.4.0",
     "split2": "^2.1.0",
     "stream-throttle": "^0.1.3",
