@@ -6,7 +6,8 @@ pipeline:
       hosts:
         - 'localhost:9092'
       topics:
-        - logbus-test
+        - even
+        - odd
       groupId: test
       offset: earliest
       format: json

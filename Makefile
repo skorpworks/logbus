@@ -28,7 +28,7 @@ help: ## show target summary
 
 
 node_modules: package.json ## install dependencies
-	npm install
+	npm install --no-optional
 	touch node_modules
 
 start: VERBOSITY=info# log level
@@ -53,16 +53,21 @@ coverage: ## record coverage metrics
 
 
 # Not sure how I'd like this automated, so capturing a recipe here for now.
+test-kafka: DOCKER=# run logbus in container instead of host
 test-kafka: ## test kafka plugins
 	@docker rm -f logbus-test-kafka > /dev/null 2> /dev/null || true
 	@docker run -d --name logbus-test-kafka -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
 	@echo waiting for kafka to start...
 	@sleep 5
-	# ./index.js -v warn test/kafka/producer.yml | bunyan -o short
-	# ./index.js -v warn test/kafka/consumer.yml | bunyan -o short
-	# @test 3 == $$(jq -s 'length' < test/kafka/out.json)
-	KAFKA_LIB=librd ./index.js -v info test/kafka/producer.yml | bunyan -o short
-	KAFKA_LIB=librd ./index.js -v info test/kafka/consumer.yml | bunyan -o short
+	if test -e test/kafka/out.json; then rm test/kafka/out.json; fi
+ifdef DOCKER
+	make docker-build KAFKA=yeee
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(DOCKER_TAG) logbus -v info /test/kafka/producer.yml | bunyan -o short
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(DOCKER_TAG) logbus -v info /test/kafka/consumer.yml | bunyan -o short
+else
+	./index.js -v info test/kafka/producer.yml | bunyan -o short
+	./index.js -v info test/kafka/consumer.yml | bunyan -o short
+endif
 	@test 3 == $$(jq -s 'length' < test/kafka/out.json)
 	@docker rm -f logbus-test-kafka > /dev/null
 
@@ -73,8 +78,11 @@ test-tail: ## test tail plugin
 	jq '.' test/tail/play.db
 
 
+docker-build: ELASTICSEARCH=yes# with elasticsearch support
+docker-build: KAFKA=# with kafka support
+docker-build: MAXMIND=# with maxmind geo db support
 docker-build: Dockerfile ## build docker image
-	docker build -t $(DOCKER_TAG) .
+	docker build --build-arg ELASTICSEARCH=$(ELASTICSEARCH) --build-arg KAFKA=$(KAFKA) --build-arg MAXMIND=$(MAXMIND) -t $(DOCKER_TAG) .
 
 
 docker-publish: ## publish docker image to repo
