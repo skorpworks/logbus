@@ -1,14 +1,29 @@
 
 pipeline:
 
-  kafka-in:
+  odd:
+    module: kafka-in
+    config:
+      hosts:
+        - 'localhost:9092'
+      topics:
+        - odd
+      groupId: odd
+      offset: earliest
+      format: json
+      compression: gzip
+      debug: cgrp,topic,fetch
+      exitAfterSeconds: 5
+      interval: 100
+
+  even:
+    module: kafka-in
     config:
       hosts:
         - 'localhost:9092'
       topics:
         - even
-        - odd
-      groupId: test
+      groupId: even
       offset: earliest
       format: json
       compression: gzip
@@ -21,10 +36,12 @@ pipeline:
   testify:
     module: js
     inChannels:
-      - kafka-in
+      - odd
+      - even
     config:
       function: !!js/function >-
-        function(event) {
+        function(event, channel) {
+          event.channel = channel
           return {key: event.ts, value: event}
         }
 

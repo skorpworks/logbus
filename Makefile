@@ -68,7 +68,8 @@ else
 	./index.js -v info test/kafka/producer.yml | bunyan -o short
 	./index.js -v info test/kafka/consumer.yml | bunyan -o short
 endif
-	@test 3 == $$(jq -s 'length' < test/kafka/out.json)
+	@test 1 == $$(jq '.value.channel | select(. == "odd")' test/kafka/out.json | wc -l)
+	@test 2 == $$(jq '.value.channel | select(. == "even")' test/kafka/out.json | wc -l)
 	@docker rm -f logbus-test-kafka > /dev/null
 
 

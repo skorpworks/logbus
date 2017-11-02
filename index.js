@@ -171,7 +171,7 @@ var Stage = function(name, stage, pipeline, log) {
 Stage.prototype.emitEvent = function(event) {
   if (event) {
     for (var outChannel of this.outChannels) {
-      this.pipeline.emit(outChannel, event)
+      this.pipeline.emit(outChannel, event, this.name)
     }
   }
 }
