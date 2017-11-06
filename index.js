@@ -1,5 +1,5 @@
-#!/bin/sh
-':' // ; exec "$(command -v node || command -v nodejs)" --harmony "${NODE_OPTIONS:---max-old-space-size=1024}" "$0" "$@"
+#!/usr/bin/env node
+
 'use strict'
 
 var USAGE = `
@@ -28,39 +28,39 @@ const lodash = require('lodash')
 const path = require('path')
 
 var MODULES = {
-  'file-in': '../lib/plugins/input/file',
-  'file-out': '../lib/plugins/output/file',
-  'json-in': '../lib/plugins/input/json',
-  'json-out': '../lib/plugins/output/json',
-  'tcp-in': '../lib/plugins/input/tcp',
-  journal: '../lib/plugins/input/journal',
-  tail: '../lib/plugins/input/tail',
-  'yaml-in': '../lib/plugins/input/yaml',
-  'yaml-out': '../lib/plugins/output/yaml',
-  agg: '../lib/plugins/agg',
-  cast: '../lib/plugins/cast',
-  drop: '../lib/plugins/drop-fields',
-  // 'elasticsearch-in': '../lib/plugins/input/elasticsearch',
-  'elasticsearch-log': '../lib/plugins/elasticsearch',
-  'elasticsearch-out': '../lib/plugins/output/elasticsearch',
-  elasticsearch: '../lib/plugins/output/elasticsearch', // DEPRECATED
-  'kafka-in': '../lib/plugins/input/kafka',
-  'kafka-out': '../lib/plugins/output/kafka',
-  errors: '../lib/plugins/errors',
-  gc: '../lib/plugins/gc',
-  geoip: '../lib/plugins/geoip',
-  geopop: '../lib/plugins/geopop',
-  js: '../lib/plugins/js',
-  keep: '../lib/plugins/keep-fields',
-  lines: '../lib/plugins/input/lines',
-  log: '../lib/plugins/log',
-  pass: '../lib/plugins/pass',
-  rename: '../lib/plugins/rename-fields',
-  sample: '../lib/plugins/sample',
-  sql: '../lib/plugins/sql',
-  stats: '../lib/plugins/stats',
-  stdin: '../lib/plugins/input/stdin',
-  stdout: '../lib/plugins/output/stdout'
+  'file-in': './lib/plugins/input/file',
+  'file-out': './lib/plugins/output/file',
+  'json-in': './lib/plugins/input/json',
+  'json-out': './lib/plugins/output/json',
+  'tcp-in': './lib/plugins/input/tcp',
+  journal: './lib/plugins/input/journal',
+  tail: './lib/plugins/input/tail',
+  'yaml-in': './lib/plugins/input/yaml',
+  'yaml-out': './lib/plugins/output/yaml',
+  agg: './lib/plugins/agg',
+  cast: './lib/plugins/cast',
+  drop: './lib/plugins/drop-fields',
+  // 'elasticsearch-in': './lib/plugins/input/elasticsearch',
+  'elasticsearch-log': './lib/plugins/elasticsearch',
+  'elasticsearch-out': './lib/plugins/output/elasticsearch',
+  elasticsearch: './lib/plugins/output/elasticsearch', // DEPRECATED
+  'kafka-in': './lib/plugins/input/kafka',
+  'kafka-out': './lib/plugins/output/kafka',
+  errors: './lib/plugins/errors',
+  gc: './lib/plugins/gc',
+  geoip: './lib/plugins/geoip',
+  geopop: './lib/plugins/geopop',
+  js: './lib/plugins/js',
+  keep: './lib/plugins/keep-fields',
+  lines: './lib/plugins/input/lines',
+  log: './lib/plugins/log',
+  pass: './lib/plugins/pass',
+  rename: './lib/plugins/rename-fields',
+  sample: './lib/plugins/sample',
+  sql: './lib/plugins/sql',
+  stats: './lib/plugins/stats',
+  stdin: './lib/plugins/input/stdin',
+  stdout: './lib/plugins/output/stdout'
 }
 
 function CLI() {
@@ -171,7 +171,7 @@ var Stage = function(name, stage, pipeline, log) {
 Stage.prototype.emitEvent = function(event) {
   if (event) {
     for (var outChannel of this.outChannels) {
-      this.pipeline.emit(outChannel, event)
+      this.pipeline.emit(outChannel, event, this.name)
     }
   }
 }

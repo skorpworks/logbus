@@ -11,14 +11,24 @@ pipeline:
     inChannels:
       - test-input
 
-  kafka-out:
+  json-in:
     inChannels:
       - lines
-    outChannels: []
+
+  kafka-out:
+    inChannels:
+      - json-in
     config:
+      format: json
       hosts:
         - 'localhost:9092'
-      topic: logbus-test
+      topic: !!js/function >-
+        function(event) {
+          return event.y % 2 === 0 ? 'even' : 'odd'
+        }
+      debug: broker,topic,msg
+      interval: 100
+      compression: gzip
 
   log-errors:
     module: errors

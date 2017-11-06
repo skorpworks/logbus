@@ -1,4 +1,4 @@
-.PHONY: help test test-kafka test-tail docker-build docker-publish rpm-publish
+.PHONY: help test test-kafka test-tail coverage docker-build docker-publish rpm-publish
 .DEFAULT_GOAL := help
 
 SHELL := /bin/bash
@@ -13,6 +13,8 @@ DOCKER_TAG := $(DOCKER_REPO)logbus
 YUM_SERVER := yum.server
 YUM_REPO := /opt/yum
 
+NODE_BIN := $(shell npm bin)
+
 
 help: ## show target summary
 	@grep -E '^\S+:.* ## .+$$' $(MAKEFILE_LIST) | sed 's/##/#/' | while IFS='#' read spec help; do \
@@ -26,50 +28,70 @@ help: ## show target summary
 
 
 node_modules: package.json ## install dependencies
-	npm install
+	npm install --no-optional
 	touch node_modules
 
 start: VERBOSITY=info# log level
 start: CONF=config/test.yml# logbus config file
 start: node_modules ## start logbus
-	node bin/logbus.js -v $(VERBOSITY) $(CONF) -c
+	./index.js -v $(VERBOSITY) $(CONF) -c
 
 
 test: node_modules ## run automated tests
-	diff -U2 test/dead-ends/out.txt <(./bin/logbus.js -c test/dead-ends/conf.yml 2>/dev/null)
-	for dir in $$(ls -d test/* | grep -v dead-ends); do \
-	  test -f $$dir/conf.yml && echo $$dir && ./bin/logbus.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
+	@diff -U2 test/dead-ends/out.txt <(./index.js -c test/dead-ends/conf.yml 2>/dev/null)
+	@for dir in $$(ls -d test/* | grep -v dead-ends); do \
+	  if test -f $$dir/conf.yml; then \
+	    echo $$dir; \
+	    ./index.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
+	  fi; \
 	done
 
 
+coverage: ## record coverage metrics
+	$(NODE_BIN)/nyc -n *.js -n lib make test
+	$(NODE_BIN)/nyc report --reporter=html
+
+
 # Not sure how I'd like this automated, so capturing a recipe here for now.
+test-kafka: DOCKER=# run logbus in container instead of host
 test-kafka: ## test kafka plugins
 	@docker rm -f logbus-test-kafka > /dev/null 2> /dev/null || true
 	@docker run -d --name logbus-test-kafka -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
 	@echo waiting for kafka to start...
-	@sleep 10
-	./bin/logbus.js -v warn test/kafka/producer.yml | bunyan -o short
-	./bin/logbus.js -v warn test/kafka/consumer.yml | bunyan -o short
-	@test 3 == $$(jq -s 'length' < test/kafka/out.json)
-	KAFKA_LIB=librd ./bin/logbus.js -v warn test/kafka/producer.yml | bunyan -o short
-	KAFKA_LIB=librd ./bin/logbus.js -v warn test/kafka/consumer.yml | bunyan -o short
-	@test 6 == $$(jq -s 'length' < test/kafka/out.json)
+	@sleep 5
+	if test -e test/kafka/out.json; then rm test/kafka/out.json; fi
+ifdef DOCKER
+	make docker-build KAFKA=yeee
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(DOCKER_TAG) logbus -v info /test/kafka/producer.yml | bunyan -o short
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(DOCKER_TAG) logbus -v info /test/kafka/consumer.yml | bunyan -o short
+else
+	./index.js -v info test/kafka/producer.yml | bunyan -o short
+	./index.js -v info test/kafka/consumer.yml | bunyan -o short
+endif
+	@test 1 == $$(jq '.value.channel | select(. == "odd")' test/kafka/out.json | wc -l)
+	@test 2 == $$(jq '.value.channel | select(. == "even")' test/kafka/out.json | wc -l)
 	@docker rm -f logbus-test-kafka > /dev/null
 
 
 # Not sure how I'd like this automated, so capturing a recipe here for now.
 test-tail: ## test tail plugin
-	./bin/logbus.js -v debug test/tail/play.yml | bunyan -o short
+	./index.js -v debug test/tail/play.yml | bunyan -o short
 	jq '.' test/tail/play.db
 
 
+docker-build: ELASTICSEARCH=yes# with elasticsearch support
+docker-build: KAFKA=# with kafka support
+docker-build: MAXMIND=# with maxmind geo db support
 docker-build: Dockerfile ## build docker image
-	docker build -t $(DOCKER_TAG) .
+	docker build --build-arg ELASTICSEARCH=$(ELASTICSEARCH) --build-arg KAFKA=$(KAFKA) --build-arg MAXMIND=$(MAXMIND) -t $(DOCKER_TAG) .
 
 
 docker-publish: ## publish docker image to repo
 	docker push $(DOCKER_TAG)
 
+
+lint: ## check code for errors
+	$(NODE_BIN)/eslint lib *.js
 
 # Experiment with other container runtimes:
 #
@@ -81,11 +103,11 @@ docker-publish: ## publish docker image to repo
 
 
 RELEASE := $(shell echo $$(( $$(rpm -qp --qf %{RELEASE} rpm 2>/dev/null) + 1)))
-rpm: Makefile lib bin node_modules ## build rpm
+rpm: Makefile lib index.js node_modules ## build rpm
 	rsync -va package.json pkg/opt/logbus/package.json
 	rsync -va --exclude test/ --exclude alasql/utils/ node_modules/ --delete-excluded pkg/opt/logbus/node_modules/
 	rsync -va lib/ pkg/opt/logbus/lib/
-	rsync -va bin/ pkg/opt/logbus/bin/
+	rsync -va index.js pkg/opt/logbus/bin/logbus
 	cp node_modules/.bin/bunyan pkg/opt/logbus/bin/
 	fpm --force --rpm-os linux -s dir -t rpm -C pkg --package rpm --name $(NAME) \
 	  --version $(VERSION) --iteration $(RELEASE) \

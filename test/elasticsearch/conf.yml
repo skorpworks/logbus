@@ -1,33 +1,64 @@
 
 pipeline:
 
-  test-input:
+  default-input:
+    module: file-in
+    config:
+      globs:
+        - test/elasticsearch/corrupt.log
+        - test/elasticsearch/multiline.log
+
+  custom-input:
     module: file-in
     config:
       globs:
         - test/elasticsearch/test.log
 
-  lines:
+  default-lines:
+    module: lines
     inChannels:
-      - test-input
+      - default-input
 
-  parse:
+  custom-lines:
+    module: lines
+    inChannels:
+      - custom-input
+
+  default-parser:
     module: elasticsearch-log
     inChannels:
-      - lines
+      - default-lines
+
+  custom-parser:
+    module: elasticsearch-log
+    inChannels:
+      - custom-lines
+    config:
+      parser:
+        - '^\[(\S+)\]\s*\[(\S+)\s*\]\s*\[(\S+)\]\s*\[(\S+)\]\s*(.+)$' 
+        - name: ts
+          timestamp: 'YYYY-MM-DDThh:mm:ss,SSS'
+        - name: severity
+        - name: logger
+        - name: node
+        - name: message
 
   # Mark which events should be rolled up.
   rollup:
     module: js
     inChannels:
-      - parse
+      - default-parser
+      - custom-parser
     config:
       function: !!js/function >-
         function(event) {
           if (event.exception) {
-            event._agg = {type: 'count', key: event.exception.msg}
+            event._agg = {type: 'count', key: event.exception.type}
           }
-          // TODO: potentially verbose non-exceptions (eg deprecation warrnings during index)
+          else if (event.logger.match(/(deprecation|^o\.e\.d)/)) {
+            event.deprecation = true
+            event._agg = {type: 'count', key: event.message}
+          }
           return event
         }
 
@@ -73,7 +104,15 @@ pipeline:
           event.end = events[events.length-1].ts
           event.duration = Math.round((event.end - event.ts) / 1000)
           event.count = events.length
-          event.message = this.util.format('%dx: %s', event.count, event._agg.key)
+          if (event.exception) {
+            // Preserve message & exception. 
+            event.message = this.util.format('%dx: %s', event.count, event.message)
+            event.exception.stack = event.exception.stack.slice(0, 5)
+          }
+          else {
+            // Assume original message in aggregation key.
+            event.message = this.util.format('%dx: %s', event.count, event._agg.key)
+          }
           delete event._agg
           return event
         }
