@@ -62,7 +62,7 @@
   },
   "2017-08-09T20:07:55.874Z": {
     "logger": "o.e.c.m.MetaDataDeleteIndexService",
-    "message": "[teracluster__assets/FZmWdiJASXKz8_L1AaO0PA] deleting index",
+    "message": "[logbus__assets/FZmWdiJASXKz8_L1AaO0PA] deleting index",
     "node": "lappy",
     "severity": "INFO",
     "ts": "2017-08-09T20:07:55.874Z"
