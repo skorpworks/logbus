@@ -56,7 +56,7 @@ coverage: ## record coverage metrics
 test-kafka: DOCKER=# run logbus in container instead of host
 test-kafka: ## test kafka plugins
 	@docker rm -f logbus-test-kafka > /dev/null 2> /dev/null || true
-	@docker run -d --name logbus-test-kafka -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
+	@docker run -d --name logbus-test-kafka -p 2181:2181 -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
 	@echo waiting for kafka to start...
 	@sleep 5
 	if test -e test/kafka/out.json; then rm test/kafka/out.json; fi
