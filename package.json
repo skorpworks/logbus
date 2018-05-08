@@ -1,6 +1,6 @@
 {
   "name": "logbus",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Log shipper written in Node",
   "directories": {
     "test": "test"
