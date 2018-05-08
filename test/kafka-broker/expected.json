@@ -1,0 +1,121 @@
+{
+  "2018-05-07T16:10:38.635Z": {
+    "message": "Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.80:34048-6418 (kafka.network.Processor)",
+    "severity": "WARN",
+    "ts": "2018-05-07T16:10:38.635Z"
+  },
+  "2018-05-07T16:11:32.455Z": {
+    "message": "Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.228:53906-6418 (kafka.network.Processor)",
+    "severity": "WARN",
+    "ts": "2018-05-07T16:11:32.455Z"
+  },
+  "2018-05-07T16:11:32.457Z": {
+    "message": "Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.228:53910-6418 (kafka.network.Processor)",
+    "severity": "WARN",
+    "ts": "2018-05-07T16:11:32.457Z"
+  },
+  "2018-05-07T16:14:34.258Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-05-07T16:14:34.258Z",
+    "exception": {
+      "message": "Connection to 1 was disconnected before the response was read",
+      "stack": [
+        "        at org.apache.kafka.clients.NetworkClientUtils.sendAndReceive(NetworkClientUtils.java:95)",
+        "        at kafka.server.ReplicaFetcherBlockingSend.sendRequest(ReplicaFetcherBlockingSend.scala:96)",
+        "        at kafka.server.ReplicaFetcherThread.fetch(ReplicaFetcherThread.scala:205)",
+        "        at kafka.server.ReplicaFetcherThread.fetch(ReplicaFetcherThread.scala:41)",
+        "        at kafka.server.AbstractFetcherThread.processFetchRequest(AbstractFetcherThread.scala:149)"
+      ],
+      "type": "java.io.IOException"
+    },
+    "logger": "ReplicaFetcher:replicaId=3, leaderId=1, fetcherId=0",
+    "message": "1x: Error in fetch to broker 1, request (type=FetchRequest, replicaId=3, maxWait=500, minBytes=1, maxBytes=10485760, fetchData={__consumer_offsets-0=(offset=299678454, logStartOffset=187457977, maxBytes=1048576), __consumer_offsets-1=(offset=299923454, logStartOffset=187412386, maxBytes=1048576)}, isolationLevel=READ_UNCOMMITTED) (kafka.server.ReplicaFetcherThread)",
+    "severity": "WARN",
+    "ts": "2018-05-07T16:14:34.258Z"
+  },
+  "2018-05-07T17:49:46.476Z": {
+    "count": 3,
+    "duration": 0,
+    "end": "2018-05-07T17:49:46.676Z",
+    "logger": "Broker:id=3",
+    "message": "3x: Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 5 for partition X since its associated leader epoch 0 is not higher than the current leader epoch 0 (state.change.logger)",
+    "partitions": [
+      "foo-0",
+      "bar-0",
+      "foo-1"
+    ],
+    "severity": "WARN",
+    "ts": "2018-05-07T17:49:46.476Z"
+  },
+  "2018-05-07T17:49:46.776Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-05-07T17:49:46.776Z",
+    "logger": "Broker:id=3",
+    "message": "1x: Skipped the become-follower state change after marking its partition as follower with correlation id 1 from controller 2 epoch 5 for partition X (last update controller epoch 5) since the new leader 2 is the same as the old leader (state.change.logger)",
+    "partitions": [
+      "__consumer_offsets-0"
+    ],
+    "severity": "INFO",
+    "ts": "2018-05-07T17:49:46.776Z"
+  },
+  "2018-05-07T18:28:49.987Z": {
+    "logger": "controller-event-thread",
+    "message": "Starting (kafka.controller.ControllerEventManager$ControllerEventThread)",
+    "severity": "INFO",
+    "ts": "2018-05-07T18:28:49.987Z"
+  },
+  "2018-05-07T18:28:49.993Z": {
+    "logger": "Controller:id=3",
+    "message": "Broker 2 has been elected as the controller, so stopping the election process. (kafka.controller.KafkaController)",
+    "severity": "DEBUG",
+    "ts": "2018-05-07T18:28:49.993Z"
+  },
+  "2018-05-07T19:15:35.059Z": {
+    "message": "Cleaner 0: Beginning cleaning of log __consumer_offsets-40. (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.059Z"
+  },
+  "2018-05-07T19:15:35.061Z": {
+    "message": "Cleaner 0: Building offset map for __consumer_offsets-40... (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.061Z"
+  },
+  "2018-05-07T19:15:35.083Z": {
+    "message": "Cleaner 0: Building offset map for log __consumer_offsets-40 for 1 segments in offset range [289, 340). (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.083Z"
+  },
+  "2018-05-07T19:15:35.104Z": {
+    "message": "Cleaner 0: Offset map for log __consumer_offsets-40 complete. (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.104Z"
+  },
+  "2018-05-07T19:15:35.110Z": {
+    "message": "Cleaner 0: Cleaning log __consumer_offsets-40 (cleaning prior to Mon May 07 07:08:07 UTC 2018, discarding tombstones prior to Sun Apr 29 13:18:07 UTC 2018)... (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.110Z"
+  },
+  "2018-05-07T19:15:35.112Z": {
+    "message": "Cleaner 0: Cleaning segment 0 in log __consumer_offsets-40 (largest timestamp Mon Apr 30 13:18:07 UTC 2018) into 0, retaining deletes. (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.112Z"
+  },
+  "2018-05-07T19:15:35.139Z": {
+    "message": "Cleaner 0: Cleaning segment 289 in log __consumer_offsets-40 (largest timestamp Mon May 07 07:08:07 UTC 2018) into 0, retaining deletes. (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.139Z"
+  },
+  "2018-05-07T19:15:35.146Z": {
+    "message": "Cleaner 0: Swapping in cleaned segment 0 for segment(s) 0,289 in log __consumer_offsets-40. (kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.146Z"
+  },
+  "2018-05-07T19:15:35.150Z": {
+    "logger": "kafka-log-cleaner-thread-0",
+    "message": "\n\nLog cleaner thread 0 cleaned log __consumer_offsets-40 (dirty section = [289, 289])\n0.0 MB of log processed in 0.1 seconds (0.2 MB/sec).\nIndexed 0.0 MB in 0.0 seconds (0.3 Mb/sec, 50.0% of total time)\nBuffer utilization: 0.0%\nCleaned 0.0 MB in 0.0 seconds (0.4 Mb/sec, 50.0% of total time)\nStart size: 0.0 MB (131 messages)\nEnd size: 0.0 MB (97 messages)\n47.6% size reduction (26.0% fewer messages)\n(kafka.log.LogCleaner)",
+    "severity": "INFO",
+    "ts": "2018-05-07T19:15:35.150Z"
+  }
+}
