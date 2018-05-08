@@ -4,7 +4,7 @@ FROM node:6-alpine
 ARG KAFKA
 RUN if test -n "${KAFKA}"; then \
       apk add --update git alpine-sdk python-dev zlib-dev bash && \
-      cd /opt && git clone -b v2.1.1 --recursive https://github.com/Blizzard/node-rdkafka.git; \
+      cd /opt && git clone -b v2.3.1 --recursive https://github.com/Blizzard/node-rdkafka.git; \
     fi
 RUN if test -n "${KAFKA}"; then \
       cd /opt/node-rdkafka && sed -i'' -E -e "s#-l(crypto|ssl)#-lz#g" deps/librdkafka.gyp && npm install -g --unsafe; \

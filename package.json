@@ -30,7 +30,7 @@
     "bunyan": "^1.8.5",
     "docopt": "^0.6.2",
     "eventemitter3": "^1.2.0",
-    "glob": "^6.0.4",
+    "glob": "^7.1.2",
     "js-yaml": "^3.3.1",
     "lodash": "^4.17.4",
     "moment": "^2.10.3",
@@ -45,7 +45,7 @@
   "optionalDependencies": {
     "elasticsearch": "^13.0.1",
     "maxmind-db-reader": "^0.2.1",
-    "node-rdkafka": "^2.1.1"
+    "node-rdkafka": "^2.3.1"
   },
   "devDependencies": {
     "eslint": "^4.7.2",
