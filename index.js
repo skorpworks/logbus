@@ -2,7 +2,7 @@
 
 'use strict'
 
-var USAGE = `
+const USAGE = `
 Process logs from configured pipeline.
 
 Usage: COMMAND [options] <config>
@@ -27,7 +27,7 @@ const util = require('util')
 const lodash = require('lodash')
 const path = require('path')
 
-var MODULES = {
+const MODULES = {
   'file-in': './lib/plugins/input/file',
   'file-out': './lib/plugins/output/file',
   'json-in': './lib/plugins/input/json',
@@ -44,6 +44,7 @@ var MODULES = {
   'elasticsearch-log': './lib/plugins/elasticsearch',
   'elasticsearch-out': './lib/plugins/output/elasticsearch',
   elasticsearch: './lib/plugins/output/elasticsearch', // DEPRECATED
+  'kafka-broker-log': './lib/plugins/kafka-broker',
   'kafka-in': './lib/plugins/input/kafka',
   'kafka-out': './lib/plugins/output/kafka',
   errors: './lib/plugins/errors',
@@ -66,7 +67,7 @@ var MODULES = {
 function CLI() {
   var bunyan = require('bunyan')
   var argv = require('docopt').docopt(USAGE)
-  var config = require('js-yaml').load(require('fs').readFileSync(argv['<config>'], 'utf8'));
+  var config = require('js-yaml').load(require('fs').readFileSync(argv['<config>'], 'utf8'))
   this.log = bunyan.createLogger({name: process.argv[1].split('/').pop(), level: bunyan[argv['--verbosity'].toUpperCase()]})
   process.setMaxListeners(Infinity)
   this.pipeline = new EventEmitter()
@@ -102,7 +103,7 @@ function CLI() {
   if (Object.keys(invalid).length > 0) {
     throw new Error('invalid stages: ' + JSON.stringify(invalid, null, 2))
   }
-  if (! argv['--check']) {
+  if (!argv['--check']) {
     this.startPipeline()
   }
 }
@@ -118,7 +119,7 @@ CLI.prototype.loadPlugins = function(basedir, plugins) {
 
 CLI.prototype.loadPipeline = function(stages) {
   this.stages = {}
-  for (var name in stages) {
+  for (let name in stages) {
     var props = stages[name]
     try {
       this.stages[name] = new Stage(name, props, this.pipeline, this.log.child({stage: name}))
@@ -127,9 +128,9 @@ CLI.prototype.loadPipeline = function(stages) {
       this.log.error(err, 'failed to load stage: %s', name)
     }
   }
-  for (var name in this.stages) {
-    var stage = this.stages[name]
-    for (var input of stage.inputs(this.stages)) {
+  for (let name in this.stages) {
+    let stage = this.stages[name]
+    for (let input of stage.inputs(this.stages)) {
       this.log.debug(util.format('%s waits on %s', name, input))
       stage.waitOn(input)
       this.pipeline.once(input + '.stopped', stage.stop.bind(stage, input))
@@ -137,7 +138,7 @@ CLI.prototype.loadPipeline = function(stages) {
   }
 }
 
-var Stage = function(name, stage, pipeline, log) {
+function Stage(name, stage, pipeline, log) {
   this.log = log
   this.name = name
   this.pipeline = pipeline
@@ -233,7 +234,7 @@ CLI.prototype.pipelinePaths = function() {
   // Scope for closures since bind() on a generator returns a normal function.
   var stages = this.stages
   // Generate all paths that end here.
-  var genpaths = function*(name) {
+  var genpaths = function * (name) {
     var stage = stages[name]
     if (stage === undefined) {
       return yield [ {reason: 'UNDEFINED', name: name} ]
@@ -244,7 +245,8 @@ CLI.prototype.pipelinePaths = function() {
     var paths = []
     for (var input of stage.inputs(stages)) {
       // TODO: Detect loops
-      var i, pathiter = genpaths(input)
+      let i
+      const pathiter = genpaths(input)
       while (true) {
         i = pathiter.next()
         if (i.done) {
@@ -264,24 +266,25 @@ CLI.prototype.pipelinePaths = function() {
         return yield [ {reason: 'DEADEND', name: name} ]
       }
     }
-    yield* paths
+    yield * paths
   }
   var paths = []
   for (var name in this.stages) {
     var stage = this.stages[name]
     if (stage.outputs(stages).length === 0) {
       // Start at stages with no outputs and work our way back.
-      var i, pathiter = genpaths(name)
+      let i
+      const pathiter = genpaths(name)
       while (true) {
         i = pathiter.next()
         if (i.done) {
           break
         }
         if (stage.isOutput) {
-          i.value[i.value.length-1].reason = 'OUTPUT'
+          i.value[i.value.length - 1].reason = 'OUTPUT'
         }
         else {
-          i.value[i.value.length-1].reason = 'DEADEND'
+          i.value[i.value.length - 1].reason = 'DEADEND'
         }
         paths.push(i.value)
       }
@@ -334,12 +337,12 @@ CLI.prototype.reportOnShutdown = function() {
 }
 
 CLI.prototype.terminate = function() {
-  this.log.error('timed out waiting for pipeline to shut down') 
+  this.log.error('timed out waiting for pipeline to shut down')
   process.exit(2)
 }
 
 if (require.main === module) {
-  var logbus = new CLI()
+  const logbus = new CLI() // eslint-disable-line no-unused-vars
 }
 else {
   module.exports = CLI
