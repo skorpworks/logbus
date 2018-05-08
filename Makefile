@@ -42,7 +42,7 @@ test: node_modules ## run automated tests
 	@for dir in $$(ls -d test/* | grep -v dead-ends); do \
 	  if test -f $$dir/conf.yml; then \
 	    echo $$dir; \
-	    ./index.js $$dir/conf.yml && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
+	    ./index.js -v warn $$dir/conf.yml | bunyan -o short && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
 	  fi; \
 	done
 
