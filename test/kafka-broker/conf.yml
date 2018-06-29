@@ -5,7 +5,7 @@ pipeline:
     module: file-in
     config:
       globs:
-        - 'test/kafka-broker/*.log'
+        - 'test/kafka-broker/server.log'
 
   default-lines:
     module: lines
@@ -28,7 +28,7 @@ pipeline:
           if (event.exception) {
             event._agg = {type: 'count', key: event.exception.type}
           }
-          else if (event.partition) {
+          else if (event.partition || event.connection) {
             event._agg = {type: 'count', key: event.message}
           }
           return event
@@ -86,6 +86,12 @@ pipeline:
             event.message = this.util.format('%dx: %s', event.count, event.message)
             event.partitions = events.map(i => i.partition)
             delete event.partition
+          }
+          else if (event.connection) {
+            // Preserve connections.
+            event.message = this.util.format('%dx: %s', event.count, event.message)
+            event.connections = events.map(i => i.connection)
+            delete event.connection
           }
           else {
             // Assume original message in aggregation key.

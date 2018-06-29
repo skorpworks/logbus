@@ -1,5 +1,5 @@
 
-FROM node:6-alpine
+FROM node:8-alpine
 
 ARG KAFKA
 RUN if test -n "${KAFKA}"; then \
@@ -22,7 +22,7 @@ RUN if test -n "${MAXMIND}"; then npm install -g maxmind-db-reader@0.2.1; fi
 # Add node modules in a way that will allow Docker to cache them.
 ADD package.json /opt/logbus/package.json
 ADD . /opt/logbus
-RUN cd /opt/logbus && npm install -g --no-optional
+RUN cd /opt/logbus && npm install -g --no-optional --only=prod
 
 # The `bin` in package.json doesn't work since node_modules in .dockerignore
 #

@@ -1,28 +1,24 @@
 {
   "2018-05-07T16:10:38.635Z": {
+    "connections": [
+      "10.0.0.2:9092-10.0.1.80:34048-6418",
+      "10.0.0.2:9092-10.0.1.228:53906-6418",
+      "10.0.0.2:9092-10.0.1.228:53910-6418"
+    ],
+    "count": 3,
+    "duration": 54,
+    "end": "2018-05-07T16:11:32.457Z",
     "logger": "kafka.network.Processor",
-    "message": "Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.80:34048-6418",
+    "message": "3x: Attempting to send response via channel for which there is no open connection",
     "severity": "WARN",
     "ts": "2018-05-07T16:10:38.635Z"
-  },
-  "2018-05-07T16:11:32.455Z": {
-    "logger": "kafka.network.Processor",
-    "message": "Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.228:53906-6418",
-    "severity": "WARN",
-    "ts": "2018-05-07T16:11:32.455Z"
-  },
-  "2018-05-07T16:11:32.457Z": {
-    "logger": "kafka.network.Processor",
-    "message": "Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.228:53910-6418",
-    "severity": "WARN",
-    "ts": "2018-05-07T16:11:32.457Z"
   },
   "2018-05-07T16:14:34.258Z": {
     "count": 1,
     "duration": 0,
     "end": "2018-05-07T16:14:34.258Z",
     "exception": {
-      "message": "Connection to 1 was disconnected before the response was read",
+      "message": "Connection to 1 was disconnected before the response was read\n        [2018-06-28T00:00:42,806][INFO ][kafka.log.Log            ] [Log partition=foo-42, dir=/data] Incrementing log start offset to 1234",
       "stack": [
         "        at org.apache.kafka.clients.NetworkClientUtils.sendAndReceive(NetworkClientUtils.java:95)",
         "        at kafka.server.ReplicaFetcherBlockingSend.sendRequest(ReplicaFetcherBlockingSend.scala:96)",
@@ -35,7 +31,7 @@
     "extra": {
       "fetcherId": "0",
       "leaderId": "1",
-      "message": "ReplicaFetcher ",
+      "message": "ReplicaFetcher",
       "replicaId": "3"
     },
     "logger": "kafka.server.ReplicaFetcherThread",
@@ -49,10 +45,10 @@
     "end": "2018-05-07T17:49:46.676Z",
     "extra": {
       "id": "3",
-      "message": "Broker "
+      "message": "Broker"
     },
     "logger": "state.change.logger",
-    "message": "3x: Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 5 for partition X since its associated leader epoch 0 is not higher than the current leader epoch 0",
+    "message": "3x: Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 5 for partition since its associated leader epoch 0 is not higher than the current leader epoch 0",
     "partitions": [
       "foo-0",
       "bar-0",
@@ -61,96 +57,68 @@
     "severity": "WARN",
     "ts": "2018-05-07T17:49:46.476Z"
   },
-  "2018-05-07T17:49:46.776Z": {
+  "2018-05-07T17:49:47.776Z": {
     "count": 1,
     "duration": 0,
-    "end": "2018-05-07T17:49:46.776Z",
+    "end": "2018-05-07T17:49:47.776Z",
     "extra": {
       "id": "3",
-      "message": "Broker "
+      "message": "Broker"
     },
     "logger": "state.change.logger",
-    "message": "1x: Skipped the become-follower state change after marking its partition as follower with correlation id 1 from controller 2 epoch 5 for partition X (last update controller epoch 5) since the new leader 2 is the same as the old leader",
+    "message": "1x: Skipped the become-follower state change after marking its partition follower with correlation id 1 from controller 2 epoch 5 for partition __consumer_offsets-0 (last update controller epoch 5) since the new leader 2 is the same as the old leader",
     "partitions": [
-      "__consumer_offsets-0"
+      "as"
     ],
     "severity": "INFO",
-    "ts": "2018-05-07T17:49:46.776Z"
+    "ts": "2018-05-07T17:49:47.776Z"
   },
-  "2018-05-07T18:28:49.987Z": {
+  "2018-06-07T17:44:03.233Z": {
+    "connections": [
+      "10.17.0.2:9092-10.228.1.85:45858-62966",
+      "10.17.0.2:9092-10.228.1.85:45858-62966",
+      "10.17.0.2:9092-10.228.1.85:45858-62966"
+    ],
+    "count": 3,
+    "duration": 2,
+    "end": "2018-06-07T17:44:05.235Z",
+    "logger": "kafka.network.Processor",
+    "message": "3x: Attempting to send response via channel for which there is no open connection",
+    "severity": "WARN",
+    "ts": "2018-06-07T17:44:03.233Z"
+  },
+  "2018-06-07T23:21:38.862Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-06-07T23:21:38.862Z",
     "extra": {
-      "message": "controller-event-thread "
+      "id": "4",
+      "message": "Broker"
     },
-    "logger": "kafka.controller.ControllerEventManager$ControllerEventThread",
-    "message": "Starting",
-    "severity": "INFO",
-    "ts": "2018-05-07T18:28:49.987Z"
+    "logger": "state.change.logger",
+    "message": "1x: Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 25 for partition since its associated leader epoch 16 is not higher than the current leader epoch 16",
+    "partitions": [
+      "foo-19"
+    ],
+    "severity": "WARN",
+    "ts": "2018-06-07T23:21:38.862Z"
   },
-  "2018-05-07T18:28:49.993Z": {
-    "extra": {
-      "id": "3",
-      "message": "Controller "
-    },
-    "logger": "kafka.controller.KafkaController",
-    "message": "Broker 2 has been elected as the controller, so stopping the election process.",
-    "severity": "DEBUG",
-    "ts": "2018-05-07T18:28:49.993Z"
-  },
-  "2018-05-07T19:15:35.059Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Beginning cleaning of log __consumer_offsets-40.",
+  "2018-06-28T00:00:42.811Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-06-28T00:00:42.811Z",
+    "logger": "kafka.server.epoch.LeaderEpochFileCache",
+    "message": "1x: Cleared earliest 0 entries from epoch cache based on passed offset 1234 leaving 2 in EpochFile for partition",
+    "partitions": [
+      "foo-42"
+    ],
     "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.059Z"
+    "ts": "2018-06-28T00:00:42.811Z"
   },
-  "2018-05-07T19:15:35.061Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Building offset map for __consumer_offsets-40...",
+  "2018-06-28T00:03:05.944Z": {
+    "logger": "kafka.log.LogSegment",
+    "message": "Deleted offset index /data/foo-42/00000000000000127487.index.deleted.",
     "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.061Z"
-  },
-  "2018-05-07T19:15:35.083Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Building offset map for log __consumer_offsets-40 for 1 segments in offset range [289, 340).",
-    "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.083Z"
-  },
-  "2018-05-07T19:15:35.104Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Offset map for log __consumer_offsets-40 complete.",
-    "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.104Z"
-  },
-  "2018-05-07T19:15:35.110Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Cleaning log __consumer_offsets-40 (cleaning prior to Mon May 07 07:08:07 UTC 2018, discarding tombstones prior to Sun Apr 29 13:18:07 UTC 2018)...",
-    "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.110Z"
-  },
-  "2018-05-07T19:15:35.112Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Cleaning segment 0 in log __consumer_offsets-40 (largest timestamp Mon Apr 30 13:18:07 UTC 2018) into 0, retaining deletes.",
-    "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.112Z"
-  },
-  "2018-05-07T19:15:35.139Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Cleaning segment 289 in log __consumer_offsets-40 (largest timestamp Mon May 07 07:08:07 UTC 2018) into 0, retaining deletes.",
-    "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.139Z"
-  },
-  "2018-05-07T19:15:35.146Z": {
-    "logger": "kafka.log.LogCleaner",
-    "message": "Cleaner 0: Swapping in cleaned segment 0 for segment(s) 0,289 in log __consumer_offsets-40.",
-    "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.146Z"
-  },
-  "2018-05-07T19:15:35.150Z": {
-    "extra": {
-      "message": "kafka-log-cleaner-thread-0 "
-    },
-    "logger": "kafka.log.LogCleaner",
-    "message": "Log cleaner thread 0 cleaned log __consumer_offsets-40 (dirty section = [289, 289])\n0.0 MB of log processed in 0.1 seconds (0.2 MB/sec).\nIndexed 0.0 MB in 0.0 seconds (0.3 Mb/sec, 50.0% of total time)\nBuffer utilization: 0.0%\nCleaned 0.0 MB in 0.0 seconds (0.4 Mb/sec, 50.0% of total time)\nStart size: 0.0 MB (131 messages)\nEnd size: 0.0 MB (97 messages)\n47.6% size reduction (26.0% fewer messages)",
-    "severity": "INFO",
-    "ts": "2018-05-07T19:15:35.150Z"
+    "ts": "2018-06-28T00:03:05.944Z"
   }
 }
