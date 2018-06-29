@@ -104,13 +104,18 @@
     "ts": "2018-06-07T23:21:38.862Z"
   },
   "2018-06-28T00:00:42.806Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-06-28T00:00:42.806Z",
     "extra": {
       "dir": "/data",
-      "message": "Log",
-      "partition": "foo-42"
+      "message": "Log"
     },
     "logger": "kafka.log.Log",
-    "message": "Incrementing log start offset to 1234",
+    "message": "1x: Incrementing log start offset to 1234",
+    "partitions": [
+      "foo-42"
+    ],
     "severity": "INFO",
     "ts": "2018-06-28T00:00:42.806Z"
   },
