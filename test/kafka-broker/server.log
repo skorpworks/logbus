@@ -10,7 +10,7 @@ java.io.IOException: Connection to 1 was disconnected before the response was re
         at kafka.server.AbstractFetcherThread.processFetchRequest(AbstractFetcherThread.scala:149)
         at kafka.server.AbstractFetcherThread.doWork(AbstractFetcherThread.scala:113)
         at kafka.utils.ShutdownableThread.run(ShutdownableThread.scala:64)
-        [2018-06-28T00:00:42,806][INFO ][kafka.log.Log            ] [Log partition=foo-42, dir=/data] Incrementing log start offset to 1234
+[2018-06-28T00:00:42,806][INFO ][kafka.log.Log            ] [Log partition=foo-42, dir=/data] Incrementing log start offset to 1234
 [2018-06-07T17:44:03,233][WARN ][kafka.network.Processor  ] Attempting to send response via channel for which there is no open connection, connection id 10.17.0.2:9092-10.228.1.85:45858-62966
 [2018-06-07T17:44:03,234][WARN ][kafka.network.Processor  ] Attempting to send response via channel for which there is no open connection, connection id 10.17.0.2:9092-10.228.1.85:45858-62966
 [2018-06-07T17:44:05,235][WARN ][kafka.network.Processor  ] Attempting to send response via channel for which there is no open connection, connection id 10.17.0.2:9092-10.228.1.85:45858-62966

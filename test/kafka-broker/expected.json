@@ -18,7 +18,7 @@
     "duration": 0,
     "end": "2018-05-07T16:14:34.258Z",
     "exception": {
-      "message": "Connection to 1 was disconnected before the response was read\n        [2018-06-28T00:00:42,806][INFO ][kafka.log.Log            ] [Log partition=foo-42, dir=/data] Incrementing log start offset to 1234",
+      "message": "Connection to 1 was disconnected before the response was read",
       "stack": [
         "        at org.apache.kafka.clients.NetworkClientUtils.sendAndReceive(NetworkClientUtils.java:95)",
         "        at kafka.server.ReplicaFetcherBlockingSend.sendRequest(ReplicaFetcherBlockingSend.scala:96)",
@@ -66,9 +66,9 @@
       "message": "Broker"
     },
     "logger": "state.change.logger",
-    "message": "1x: Skipped the become-follower state change after marking its partition follower with correlation id 1 from controller 2 epoch 5 for partition __consumer_offsets-0 (last update controller epoch 5) since the new leader 2 is the same as the old leader",
+    "message": "1x: Skipped the become-follower state change after marking its partition as follower with correlation id 1 from controller 2 epoch 5 for partition (last update controller epoch 5) since the new leader 2 is the same as the old leader",
     "partitions": [
-      "as"
+      "__consumer_offsets-0"
     ],
     "severity": "INFO",
     "ts": "2018-05-07T17:49:47.776Z"
@@ -102,6 +102,17 @@
     ],
     "severity": "WARN",
     "ts": "2018-06-07T23:21:38.862Z"
+  },
+  "2018-06-28T00:00:42.806Z": {
+    "extra": {
+      "dir": "/data",
+      "message": "Log",
+      "partition": "foo-42"
+    },
+    "logger": "kafka.log.Log",
+    "message": "Incrementing log start offset to 1234",
+    "severity": "INFO",
+    "ts": "2018-06-28T00:00:42.806Z"
   },
   "2018-06-28T00:00:42.811Z": {
     "count": 1,
