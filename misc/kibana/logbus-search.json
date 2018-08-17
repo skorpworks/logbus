@@ -1,0 +1,50 @@
+[
+  {
+    "_id": "05256230-b914-11e7-b878-d51565f80a71",
+    "_type": "search",
+    "_source": {
+      "title": "Logbus - Errors",
+      "description": "",
+      "hits": 0,
+      "columns": [
+        "shipper",
+        "service",
+        "message",
+        "count"
+      ],
+      "sort": [
+        "ts",
+        "desc"
+      ],
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"logbus.logbus\",\"highlightAll\":true,\"query\":{\"query_string\":{\"query\":\"type:error\",\"analyze_wildcard\":true}},\"filter\":[{\"meta\":{\"negate\":true,\"index\":\"logbus.logbus\",\"key\":\"message\",\"value\":\"kafka-out: Error: Local: Broker transport failure\",\"disabled\":false,\"alias\":null},\"query\":{\"match\":{\"message\":{\"query\":\"kafka-out: Error: Local: Broker transport failure\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}]}"
+      }
+    }
+  },
+  {
+    "_id": "96b7baf0-b913-11e7-b878-d51565f80a71",
+    "_type": "search",
+    "_source": {
+      "title": "Logbus - Stats",
+      "description": "",
+      "hits": 0,
+      "columns": [
+        "shipper",
+        "errors",
+        "heapMB",
+        "rssMB",
+        "events_in",
+        "events_out"
+      ],
+      "sort": [
+        "ts",
+        "desc"
+      ],
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"logbus.logbus\",\"highlightAll\":true,\"query\":{\"query_string\":{\"query\":\"type:stats\",\"analyze_wildcard\":true}},\"filter\":[]}"
+      }
+    }
+  }
+]

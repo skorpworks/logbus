@@ -1,0 +1,123 @@
+{
+  "template": "logbus.kafka-*",
+  "order": 10,
+  "aliases": {
+    "logbus.kafka": {}
+  },
+  "settings" : {
+    "index" : {
+      "number_of_shards" : "3",
+      "number_of_replicas" : "1"
+    },
+    "query": {
+      "default_field": "all"
+    },
+    "analysis": {
+      "analyzer": {
+        "default": {
+          "filter": [
+            "lowercase"
+          ],
+          "stopwords": "_none_",
+          "tokenizer": "default",
+          "type": "custom"
+        },
+        "alphanum": {
+          "filter": [
+            "lowercase"
+          ],
+          "stopwords": "_none_",
+          "tokenizer": "alphanum",
+          "type": "custom"
+        }
+      },
+      "tokenizer": {
+        "default": {
+          "pattern": "[^-_\\p{Alnum}]",
+          "type": "pattern"
+        },
+        "alphanum": {
+          "pattern": "[^\\p{Alnum}]",
+          "type": "pattern"
+        }
+      }
+    }
+  },
+  "mappings" : {
+    "event" : {
+      "properties" : {
+        "all" : {
+          "analyzer": "alphanum",
+          "store": false,
+          "type" : "text"
+        },
+        "chassis": {
+          "type": "long"
+        },
+        "count": {
+          "type": "long"
+        },
+        "duration": {
+          "type": "long"
+        },
+        "end": {
+          "type": "date"
+        },
+        "env": {
+          "type": "keyword"
+        },
+        "exception": {
+          "properties": {
+            "message": {
+              "copy_to": "all",
+              "type": "text"
+            },
+            "stack": {
+              "type": "text"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "host": {
+          "type": "keyword"
+        },
+        "instance": {
+          "type": "keyword"
+        },
+        "logger": {
+          "type": "keyword"
+        },
+        "message": {
+          "copy_to": "all",
+          "type": "text"
+        },
+        "node": {
+          "type": "long"
+        },
+        "partitions": {
+          "type": "text"
+        },
+        "rack": {
+          "type": "long"
+        },
+        "service": {
+          "type": "keyword"
+        },
+        "severity": {
+          "type": "long"
+        },
+        "shipper": {
+          "type": "keyword"
+        },
+        "ts": {
+          "type": "date"
+        },
+        "type": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
