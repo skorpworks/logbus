@@ -4,11 +4,11 @@
 SHELL := /bin/bash
 
 NAME := logbus
-VERSION := 0.5.14
+VERSION := $(shell jq -r .version package.json)
 MAINTAINER := foo@bar.com
 
-DOCKER_REPO := docker.repo/
-DOCKER_TAG := $(DOCKER_REPO)logbus
+DOCKER_REPO := docker.repo
+DOCKER_TAG := $(DOCKER_REPO)/$(NAME):$(VERSION)
 
 YUM_SERVER := yum.server
 YUM_REPO := /opt/yum
@@ -37,6 +37,10 @@ start: node_modules ## start logbus
 	./index.js -v $(VERBOSITY) $(CONF) -c
 
 
+etl: node_modules ## run automated tests
+	./index.js -v debug examples/elasticsearch-etl/conf.yml | bunyan -o short
+
+
 test: node_modules ## run automated tests
 	@diff -U2 test/dead-ends/out.txt <(./index.js -c test/dead-ends/conf.yml 2>/dev/null)
 	@for dir in $$(ls -d test/* | grep -v dead-ends); do \
@@ -62,8 +66,8 @@ test-kafka: ## test kafka plugins
 	if test -e test/kafka/out.json; then rm test/kafka/out.json; fi
 ifdef DOCKER
 	make docker-build KAFKA=yeee
-	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(DOCKER_TAG) logbus -v info /test/kafka/producer.yml | bunyan -o short
-	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(DOCKER_TAG) logbus -v info /test/kafka/consumer.yml | bunyan -o short
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) logbus -v info /test/kafka/producer.yml | bunyan -o short
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) logbus -v info /test/kafka/consumer.yml | bunyan -o short
 else
 	./index.js -v info test/kafka/producer.yml | bunyan -o short
 	./index.js -v info test/kafka/consumer.yml | bunyan -o short
@@ -83,23 +87,16 @@ docker-build: ELASTICSEARCH=yes# with elasticsearch support
 docker-build: KAFKA=# with kafka support
 docker-build: MAXMIND=# with maxmind geo db support
 docker-build: Dockerfile ## build docker image
-	docker build --build-arg ELASTICSEARCH=$(ELASTICSEARCH) --build-arg KAFKA=$(KAFKA) --build-arg MAXMIND=$(MAXMIND) -t $(DOCKER_TAG) .
+	docker build --build-arg ELASTICSEARCH=$(ELASTICSEARCH) --build-arg KAFKA=$(KAFKA) --build-arg MAXMIND=$(MAXMIND) -t $(NAME) .
 
 
 docker-publish: ## publish docker image to repo
+	docker tag $(NAME) $(DOCKER_TAG)
 	docker push $(DOCKER_TAG)
 
 
 lint: ## check code for errors
 	$(NODE_BIN)/eslint lib *.js
-
-# Experiment with other container runtimes:
-#
-# pkg/opt/logbus/rootfs: docker-build ## build rootfs
-# 	test -d pkg/opt/logbus/rootfs || mkdir -p pkg/opt/logbus/rootfs
-# 	cid=$$(docker run -i -d $(DOCKER_TAG) sh)
-# 	docker export $$cid | tar x -C pkg/opt/logbus/rootfs
-# 	docker rm -f $$cid
 
 
 RELEASE := $(shell echo $$(( $$(rpm -qp --qf %{RELEASE} rpm 2>/dev/null) + 1)))

@@ -40,7 +40,7 @@ const MODULES = {
   agg: './lib/plugins/agg',
   cast: './lib/plugins/cast',
   drop: './lib/plugins/drop-fields',
-  // 'elasticsearch-in': './lib/plugins/input/elasticsearch',
+  'elasticsearch-in': './lib/plugins/input/elasticsearch',
   'elasticsearch-log': './lib/plugins/elasticsearch',
   'elasticsearch-out': './lib/plugins/output/elasticsearch',
   elasticsearch: './lib/plugins/output/elasticsearch', // DEPRECATED

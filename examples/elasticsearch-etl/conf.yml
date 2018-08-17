@@ -1,0 +1,71 @@
+
+# Example [re]index / ETL with elasticsearch as source.
+
+pipeline:
+
+  extract:
+    module: elasticsearch-in
+    config:
+      search:
+        index: 'dood'
+        scroll: 1m
+        size: 1000
+      hosts:
+        - http://localhost:9201
+
+  # Remove variable & environment specific data and transform to format that is
+  # easier for `jq` to produce deterministic results.
+  transform:
+    module: js
+    inChannels:
+      - extract
+    config:
+      function: !!js/function >-
+        function(event) {
+          event._source._id = event._id                              // preserve id
+          event._source._type = 'doc'                                // no more types in 6.x
+          if (event._source.hostname.endsWith('.local')) {
+            event._source.hostname = 'work'
+          }
+          // event._source._index = event._index.replace(/......$/, '') // drop the day & month
+          return event._source
+        }
+
+  load:
+    module: elasticsearch-out
+    inChannels:
+      - transform
+    outChannels: []
+    config:
+      bufferSize: 1000
+      index: daad
+      hosts:
+        - http://localhost:9201
+
+  # If would like to snoop on a subset of the data.
+  #
+  # log-sample:
+  #   module: sample
+  #   inChannels:
+  #     - transform
+  #   config:
+  #     nth: 1000
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      interval: 5
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+
+  log:
+    inChannels:
+      # - log-sample
+      - log-errors
+      - log-stats
