@@ -82,9 +82,11 @@
       ],
       "type": "org.elasticsearch.search.fetch.FetchPhaseExecutionException"
     },
+    "index": "some-index",
     "logger": "org.elasticsearch.cluster.action.shard.ShardStateAction",
     "message": "1x: [some-index][42] received shard failed for shard id [[some-index][42]], allocation id [Fo2N30b3SEGvyUGIe00OGA], primary term [0], message [shard failure, reason [search execution corruption failure]], failure [FetchPhaseExecutionException[Fetch Failed [Failed to fetch doc id [abc123]]]; nested: CorruptIndexException[Corrupted: docID=abc123, docBase=0, chunkDocs=0, numDocs=55 (resource=MMapIndexInput(path=\"/var/elasticsearch/nodes/0/indices/Bj1swrdnS4uIlFvpEm6_Tg/42/index/_18nxi.fdt\"))]; ]",
     "severity": "WARN",
+    "shard": 42,
     "ts": "2017-09-15T19:30:28.925Z"
   },
   "2017-09-23T02:18:26.553Z": {
@@ -114,5 +116,58 @@
     "node": "lappy",
     "severity": "WARN",
     "ts": "2017-09-28T21:46:56.383Z"
+  },
+  "2018-05-22T21:04:05.154Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-05-22T21:04:05.154Z",
+    "exception": {
+      "message": "[foo][192.168.1.4:9300] connect_timeout[30s]",
+      "stack": [
+        "        at org.elasticsearch.transport.netty4.Netty4Transport.connectToChannels(Netty4Transport.java:363) ~[?:?]",
+        "        at org.elasticsearch.transport.TcpTransport.openConnection(TcpTransport.java:570) ~[elasticsearch-5.6.9.jar:5.6.9]",
+        "        at org.elasticsearch.transport.TcpTransport.connectToNode(TcpTransport.java:473) ~[elasticsearch-5.6.9.jar:5.6.9]",
+        "        at org.elasticsearch.transport.TransportService.connectToNode(TransportService.java:342) ~[elasticsearch-5.6.9.jar:5.6.9]",
+        "        at org.elasticsearch.transport.TransportService.connectToNode(TransportService.java:329) ~[elasticsearch-5.6.9.jar:5.6.9]"
+      ],
+      "type": "org.elasticsearch.transport.ConnectTransportException"
+    },
+    "logger": "org.elasticsearch.cluster.NodeConnectionsService",
+    "message": "1x: failed to connect to node {foo}{VMfOtM7_Rb2zmek4fFRFWw}{ehZ7nxSSQEW2PFgvJVkqRg}{192.168.1.4}{192.168.1.4:9300}{rack=5} (tried [1] times)",
+    "severity": "WARN",
+    "ts": "2018-05-22T21:04:05.154Z"
+  },
+  "2018-05-23T17:22:19.376Z": {
+    "count": 3,
+    "duration": 1,
+    "end": "2018-05-23T17:22:19.876Z",
+    "exception": {
+      "message": "[foo.bar][192.168.1.11:9300] Node not connected",
+      "stack": [
+        "        at org.elasticsearch.transport.TcpTransport.getConnection(TcpTransport.java:590) ~[elasticsearch-5.6.9.jar:5.6.9]",
+        "        at org.elasticsearch.transport.TcpTransport.getConnection(TcpTransport.java:113) ~[elasticsearch-5.6.9.jar:5.6.9]",
+        "        at org.elasticsearch.transport.TransportService.getConnection(TransportService.java:506) ~[elasticsearch-5.6.9.jar:5.6.9]",
+        "        at org.elasticsearch.transport.TransportService.sendRequest(TransportService.java:482) ~[elasticsearch-5.6.9.jar:5.6.9]",
+        "        at org.elasticsearch.action.support.replication.TransportReplicationAction$ReplicasProxy.performOn(TransportReplicationAction.java:962) ~[elasticsearch-5.6.9.jar:5.6.9]"
+      ],
+      "type": "org.elasticsearch.transport.NodeNotConnectedException"
+    },
+    "index": "bar-2018.05",
+    "logger": "org.elasticsearch.cluster.action.shard.ShardStateAction",
+    "message": "3x: [bar-2018.05][19] received shard failed for shard id [[bar-2018.05][19]], allocation id [ddfvFJXjSM6ImhDO8ftmJA], primary term [1], message [failed to perform indices:data/write/bulk[s] on replica [bar-2018.05][19], node[Vhfc1BQeTnK7tKDG0pTwOw], [R], s[STARTED], a[id=ddfvFJXjSM6ImhDO8ftmJA]], failure [NodeNotConnectedException[[foo.bar][192.168.1.11:9300] Node not connected]]",
+    "severity": "WARN",
+    "shard": 19,
+    "ts": "2018-05-23T17:22:19.376Z"
+  },
+  "2018-05-23T17:22:19.773Z": {
+    "count": 12,
+    "duration": 0,
+    "end": "2018-05-23T17:22:19.841Z",
+    "index": "foo-2018.05.23",
+    "logger": "org.elasticsearch.cluster.action.shard.ShardStateAction",
+    "message": "12x: foo-2018.05.23-9",
+    "severity": "WARN",
+    "shard": 9,
+    "ts": "2018-05-23T17:22:19.773Z"
   }
 }

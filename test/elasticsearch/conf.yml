@@ -7,6 +7,7 @@ pipeline:
       globs:
         - test/elasticsearch/corrupt.log
         - test/elasticsearch/multiline.log
+        - test/elasticsearch/shard-failure.log
 
   custom-input:
     module: file-in
@@ -35,13 +36,14 @@ pipeline:
       - custom-lines
     config:
       parser:
-        - '^\[(\S+)\]\s*\[(\S+)\s*\]\s*\[(\S+)\]\s*\[(\S+)\]\s*(.+)$' 
-        - name: ts
-          timestamp: 'YYYY-MM-DDThh:mm:ss,SSS'
-        - name: severity
-        - name: logger
-        - name: node
-        - name: message
+        regex: '^\[(\S+)\]\s*\[(\S+)\s*\]\s*\[(\S+)\]\s*\[(\S+)\]\s*(.+)$' 
+        fields:
+          - name: ts
+            timestamp: 'YYYY-MM-DDThh:mm:ss,SSS'
+          - name: severity
+          - name: logger
+          - name: node
+          - name: message
 
   # Mark which events should be rolled up.
   rollup:
@@ -54,6 +56,9 @@ pipeline:
         function(event) {
           if (event.exception) {
             event._agg = {type: 'count', key: event.exception.type}
+          }
+          else if (event.index && event.shard) {
+            event._agg = {type: 'count', key: `${event.index}-${event.shard}`}
           }
           else if (event.logger.match(/(deprecation|^o\.e\.d)/)) {
             event.deprecation = true
