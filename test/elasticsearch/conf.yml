@@ -58,7 +58,7 @@ pipeline:
             event._agg = {type: 'count', key: event.exception.type}
           }
           else if (event.index && event.shard) {
-            event._agg = {type: 'count', key: `${event.index}-${event.shard}`}
+            event._agg = {type: 'count', key: `${event.index}-${event.shard}`, msg: event.message}
           }
           else if (event.logger.match(/(deprecation|^o\.e\.d)/)) {
             event.deprecation = true
@@ -116,7 +116,7 @@ pipeline:
           }
           else {
             // Assume original message in aggregation key.
-            event.message = this.util.format('%dx: %s', event.count, event._agg.key)
+            event.message = this.util.format('%dx: %s', event.count, event._agg.msg || event._agg.key)
           }
           delete event._agg
           return event
@@ -154,7 +154,7 @@ pipeline:
     inChannels:
       - errors
     config:
-      interval: 5
+      intervalSeconds: 5
       stackDepth: 6
 
   log-stats:

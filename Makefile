@@ -38,7 +38,7 @@ start: node_modules ## start logbus
 
 
 etl: node_modules ## run automated tests
-	./index.js -v debug examples/elasticsearch-etl/conf.yml | bunyan -o short
+	./index.js -v info examples/elasticsearch-etl/conf.yml | bunyan -o short
 
 
 test: node_modules ## run automated tests

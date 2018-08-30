@@ -14,7 +14,6 @@ pipeline:
       compression: gzip
       debug: cgrp,topic,fetch
       exitAfterSeconds: 5
-      interval: 100
 
   even:
     module: kafka-in
@@ -29,7 +28,6 @@ pipeline:
       compression: gzip
       debug: cgrp,topic,fetch
       exitAfterSeconds: 5
-      interval: 100
 
   # Remove variable & environment specific data and transform to format that is
   # easier for `jq` to produce deterministic results.
@@ -45,15 +43,14 @@ pipeline:
           return {key: event.ts, value: event}
         }
 
-  json-output:
-    module: json-out
+  json-out:
     inChannels:
       - testify
 
   test-output:
     module: file-out
     inChannels:
-      - json-output
+      - json-out
     config:
       path: test/kafka/out.json
 
@@ -62,7 +59,7 @@ pipeline:
     inChannels:
       - errors
     config:
-      interval: 5
+      intervalSeconds: 5
       stackDepth: 6
 
   log-stats:

@@ -165,7 +165,7 @@
     "end": "2018-05-23T17:22:19.841Z",
     "index": "foo-2018.05.23",
     "logger": "org.elasticsearch.cluster.action.shard.ShardStateAction",
-    "message": "12x: foo-2018.05.23-9",
+    "message": "12x: [foo-2018.05.23][9] received shard failed for shard id [[foo-2018.05.23][9]], allocation id [rgu53sRBTfG4QcZKTW4VAw], primary term [2], message [mark copy as stale]",
     "severity": "WARN",
     "shard": 9,
     "ts": "2018-05-23T17:22:19.773Z"
