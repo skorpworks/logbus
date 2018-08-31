@@ -5,13 +5,9 @@ WORKDIR /opt/logbus
 
 ARG KAFKA
 RUN if test -n "${KAFKA}"; then \
-      apk add --update git alpine-sdk python-dev zlib-dev bash && \
-      cd /opt && git clone -b v2.3.1 --recursive https://github.com/Blizzard/node-rdkafka.git; \
-      cd /opt/node-rdkafka && sed -i'' -E -e "s#-l(crypto|ssl)#-lz#g" deps/librdkafka.gyp && npm install -g --unsafe; \
+    apk add --update alpine-sdk python-dev zlib-dev bash && \
+    npm install node-rdkafka@2.4.1; \
     fi
-
-ARG ELASTICSEARCH
-RUN if test -n "${ELASTICSEARCH}"; then npm install elasticsearch@13.0.1; fi
 
 ARG ALASQL
 RUN if test -n "${ALASQL}"; then npm install alasql@0.3.3; fi
@@ -29,4 +25,4 @@ RUN npm install --no-optional --only=prod
 #
 RUN ln -s /opt/logbus/index.js /usr/bin/logbus
 
-CMD ["bash"]
+ENTRYPOINT ["logbus"]
