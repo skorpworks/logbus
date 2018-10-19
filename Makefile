@@ -83,7 +83,6 @@ test-tail: ## test tail plugin
 	jq '.' test/tail/play.db
 
 
-docker-build: ELASTICSEARCH=yes# with elasticsearch support
 docker-build: KAFKA=# with kafka support
 docker-build: MAXMIND=# with maxmind geo db support
 docker-build: Dockerfile ## build docker image
