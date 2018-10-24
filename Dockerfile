@@ -1,7 +1,14 @@
 
-FROM node:8-alpine
+FROM node:8-slim
 
 WORKDIR /opt/logbus
+
+RUN \
+  apt-get update && \
+  apt-get install -y git python-dev && \
+  apt-get autoremove -y && \
+  apt-get clean -y && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ARG KAFKA
 RUN if test -n "${KAFKA}"; then \
@@ -16,8 +23,12 @@ ARG MAXMIND
 RUN if test -n "${MAXMIND}"; then npm install maxmind-db-reader@0.2.1; fi
 
 # Add node modules in a way that will allow Docker to cache them.
-ADD . .
+ADD package.json .
+ADD package-lock.json .
 RUN npm install --no-optional --only=prod
+ADD lib lib
+ADD stage.js .
+ADD index.js .
 
 # The `bin` in package.json doesn't work since node_modules in .dockerignore
 #
