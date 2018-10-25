@@ -1,6 +1,6 @@
 {
   "name": "logbus",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Log shipper written in Node",
   "directories": {
     "test": "test"
@@ -27,9 +27,9 @@
   "homepage": "https://github.com/skorpworks/logbus",
   "license": "Apache-2.0",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "bunyan": "^1.8.5",
     "docopt": "^0.6.2",
-    "elasticsearch": "^15.1.1",
     "eventemitter3": "^1.2.0",
     "glob": "^7.1.2",
     "js-yaml": "^3.3.1",
@@ -40,6 +40,7 @@
     "simple-get": "^2.4.0",
     "split2": "^2.1.0",
     "stream-throttle": "^0.1.3",
+    "superagent": "erik-stephens/superagent",
     "sync-request": "^6.0.0",
     "tail-forever": "^0.3.13"
   },

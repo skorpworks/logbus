@@ -1,17 +1,20 @@
 
-FROM node:8-alpine
+FROM node:8-slim
 
 WORKDIR /opt/logbus
 
+RUN \
+  apt-get update && \
+  apt-get install -y git python-dev && \
+  apt-get autoremove -y && \
+  apt-get clean -y && \
+  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 ARG KAFKA
 RUN if test -n "${KAFKA}"; then \
-      apk add --update git alpine-sdk python-dev zlib-dev bash && \
-      cd /opt && git clone -b v2.3.1 --recursive https://github.com/Blizzard/node-rdkafka.git; \
-      cd /opt/node-rdkafka && sed -i'' -E -e "s#-l(crypto|ssl)#-lz#g" deps/librdkafka.gyp && npm install -g --unsafe; \
+    apk add --update alpine-sdk python-dev zlib-dev bash && \
+    npm install node-rdkafka@2.4.1; \
     fi
-
-ARG ELASTICSEARCH
-RUN if test -n "${ELASTICSEARCH}"; then npm install elasticsearch@13.0.1; fi
 
 ARG ALASQL
 RUN if test -n "${ALASQL}"; then npm install alasql@0.3.3; fi
@@ -20,8 +23,12 @@ ARG MAXMIND
 RUN if test -n "${MAXMIND}"; then npm install maxmind-db-reader@0.2.1; fi
 
 # Add node modules in a way that will allow Docker to cache them.
-ADD . .
+ADD package.json .
+ADD package-lock.json .
 RUN npm install --no-optional --only=prod
+ADD lib lib
+ADD stage.js .
+ADD index.js .
 
 # The `bin` in package.json doesn't work since node_modules in .dockerignore
 #
@@ -29,4 +36,4 @@ RUN npm install --no-optional --only=prod
 #
 RUN ln -s /opt/logbus/index.js /usr/bin/logbus
 
-CMD ["bash"]
+ENTRYPOINT ["logbus"]

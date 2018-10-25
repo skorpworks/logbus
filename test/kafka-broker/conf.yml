@@ -133,7 +133,7 @@ pipeline:
     inChannels:
       - errors
     config:
-      interval: 5
+      intervalSeconds: 5
       stackDepth: 6
 
   log-stats:

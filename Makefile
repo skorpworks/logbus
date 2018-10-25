@@ -38,7 +38,7 @@ start: node_modules ## start logbus
 
 
 etl: node_modules ## run automated tests
-	./index.js -v debug examples/elasticsearch-etl/conf.yml | bunyan -o short
+	./index.js -v info examples/elasticsearch-etl/conf.yml | bunyan -o short
 
 
 test: node_modules ## run automated tests
@@ -63,11 +63,11 @@ test-kafka: ## test kafka plugins
 	@docker run -d --name logbus-test-kafka -p 2181:2181 -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
 	@echo waiting for kafka to start...
 	@sleep 5
-	if test -e test/kafka/out.json; then rm test/kafka/out.json; fi
+	@if test -e test/kafka/out.json; then rm test/kafka/out.json; fi
 ifdef DOCKER
 	make docker-build KAFKA=yeee
-	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) logbus -v info /test/kafka/producer.yml | bunyan -o short
-	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) logbus -v info /test/kafka/consumer.yml | bunyan -o short
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) -v info /test/kafka/producer.yml | bunyan -o short
+	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) -v info /test/kafka/consumer.yml | bunyan -o short
 else
 	./index.js -v info test/kafka/producer.yml | bunyan -o short
 	./index.js -v info test/kafka/consumer.yml | bunyan -o short
@@ -83,7 +83,6 @@ test-tail: ## test tail plugin
 	jq '.' test/tail/play.db
 
 
-docker-build: ELASTICSEARCH=yes# with elasticsearch support
 docker-build: KAFKA=# with kafka support
 docker-build: MAXMIND=# with maxmind geo db support
 docker-build: Dockerfile ## build docker image
