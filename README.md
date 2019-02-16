@@ -18,6 +18,11 @@ javascript file - relative paths will be resolved relative to the config file's
 directory. Refer to ./lib/plugins/pass.js as a skeleton for creating plugins.
 Custom plugins need to manage their own dependencies (eg `npm install ...`).
 
+### Setting Max Heap to Avoid Out-of-Memory (OOM) Errors
+
+Can override the default via environment variable like so:
+
+    NODE_OPTIONS='--max_old_space_size=4096'
 
 ## Dev
 
