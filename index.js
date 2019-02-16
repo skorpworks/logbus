@@ -12,6 +12,8 @@ Options:
     trace, debug, info, warn, error, fatal [default: warn]
   -c, --check
     Validate pipeline
+  --timeout SECONDS
+    How long to give stages to stop on pipeline shutdown [default: 10]
 `
 
 const EXITS = {
@@ -117,6 +119,7 @@ function CLI() {
   if (!argv['--check']) {
     this.startPipeline()
   }
+  this.shutdownTimeout = parseFloat(argv['--timeout']) * 1000
 }
 
 CLI.prototype.loadPlugins = function(basedir, plugins) {
@@ -265,7 +268,7 @@ CLI.prototype.shutdown = function(reason) {
   })
   // TODO: Stop stages, then stats, then errors
   setInterval(this.reportOnShutdown.bind(this), 1000)
-  setTimeout(this.terminate.bind(this), 10000)
+  setTimeout(this.terminate.bind(this), this.shutdownTimeout)
 }
 
 CLI.prototype.reportOnShutdown = function() {
@@ -273,7 +276,7 @@ CLI.prototype.reportOnShutdown = function() {
   _.each(this.stages, (stage, name) => {
     if (!stage.stopped()) {
       shutdown = false
-      this.log.debug(name, 'waiting on', Object.keys(stage.waitingOn).join(',') || 'SELF')
+      this.log.info(name, 'waiting on', Object.keys(stage.waitingOn).join(',') || 'SELF')
     }
   })
   if (shutdown) {
