@@ -1,0 +1,14 @@
+{"ts": "2019-02-16T13:37:00Z", "process": "some-app", "msg": "dropped since not between start & stop markers"}
+{"ts": "2019-02-16T13:37:01Z", "process": "noisy-app", "msg": "HALP!"}
+{"ts": "2019-02-16T13:37:01Z", "process": "cool-app", "msg": "Just doing my thing"}
+{"ts": "2019-02-16T13:37:02Z", "process": "noisy-app", "msg": "HALP!"}
+{"ts": "2019-02-16T13:37:03Z", "process": "some-app", "msg": "Starting..."}
+{"ts": "2019-02-16T13:37:04Z", "process": "some-app", "msg": "Did foo."}
+{"ts": "2019-02-16T13:37:04Z", "process": "cool-app", "msg": "Not making too much fuss"}
+{"ts": "2019-02-16T13:37:06Z", "process": "noisy-app", "msg": "HALP!"}
+{"ts": "2019-02-16T13:37:07Z", "process": "some-app", "msg": "Did bar."}
+{"ts": "2019-02-16T13:37:08Z", "process": "noisy-app", "msg": "Hi, Mom!"}
+{"ts": "2019-02-16T13:37:09Z", "process": "noisy-app", "msg": "HALP!"}
+{"ts": "2019-02-16T13:37:10Z", "process": "some-app", "msg": "Did baz."}
+{"ts": "2019-02-16T13:37:11Z", "process": "some-app", "msg": "Finished."}
+{"ts": "2019-02-16T13:37:12Z", "process": "noisy-app", "msg": "Hi, Mom!"}
