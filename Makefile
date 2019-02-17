@@ -86,7 +86,7 @@ test-tail: ## test tail plugin
 docker-build: KAFKA=# with kafka support
 docker-build: MAXMIND=# with maxmind geo db support
 docker-build: Dockerfile ## build docker image
-	docker build --build-arg ELASTICSEARCH=$(ELASTICSEARCH) --build-arg KAFKA=$(KAFKA) --build-arg MAXMIND=$(MAXMIND) -t $(NAME) .
+	docker build --build-arg KAFKA=$(KAFKA) --build-arg MAXMIND=$(MAXMIND) -t $(NAME) .
 
 
 docker-publish: ## publish docker image to repo

@@ -1,0 +1,33 @@
+{
+  "cool-app:2019-02-16T13:37:01Z": {
+    "msg": "Just doing my thing",
+    "process": "cool-app",
+    "ts": "2019-02-16T13:37:01Z"
+  },
+  "cool-app:2019-02-16T13:37:04Z": {
+    "msg": "Not making too much fuss",
+    "process": "cool-app",
+    "ts": "2019-02-16T13:37:04Z"
+  },
+  "noisy-app:2019-02-16T13:37:01Z": {
+    "count": 4,
+    "end": "2019-02-16T13:37:09Z",
+    "msg": "HALP!",
+    "process": "noisy-app",
+    "ts": "2019-02-16T13:37:01Z"
+  },
+  "noisy-app:2019-02-16T13:37:08Z": {
+    "count": 2,
+    "end": "2019-02-16T13:37:12Z",
+    "msg": "Hi, Mom!",
+    "process": "noisy-app",
+    "ts": "2019-02-16T13:37:08Z"
+  },
+  "some-app:2019-02-16T13:37:03Z": {
+    "count": 5,
+    "end": "2019-02-16T13:37:11Z",
+    "msg": "Starting...\nDid foo.\nDid bar.\nDid baz.\nFinished.",
+    "process": "some-app",
+    "ts": "2019-02-16T13:37:03Z"
+  }
+}
