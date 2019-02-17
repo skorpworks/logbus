@@ -3,24 +3,20 @@ FROM node:8-slim
 
 WORKDIR /opt/logbus
 
-RUN \
-  apt-get update && \
-  apt-get install -y git python-dev && \
-  apt-get autoremove -y && \
-  apt-get clean -y && \
-  rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# Need git for my superagent.
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 ARG KAFKA
 RUN if test -n "${KAFKA}"; then \
-    apk add --update alpine-sdk python-dev zlib-dev bash && \
-    npm install node-rdkafka@2.4.1; \
-    fi
+  apt-get update && apt-get install -y build-essential python-dev && rm -rf /var/lib/apt/lists/* && \
+  npm install node-rdkafka@${KAFKA}; \
+  fi
 
 ARG ALASQL
-RUN if test -n "${ALASQL}"; then npm install alasql@0.3.3; fi
+RUN if test -n "${ALASQL}"; then npm install alasql@${ALASQL}; fi
 
 ARG MAXMIND
-RUN if test -n "${MAXMIND}"; then npm install maxmind-db-reader@0.2.1; fi
+RUN if test -n "${MAXMIND}"; then npm install maxmind-db-reader@${MAXMIND}; fi
 
 # Add node modules in a way that will allow Docker to cache them.
 ADD package.json .
@@ -37,3 +33,4 @@ ADD index.js .
 RUN ln -s /opt/logbus/index.js /usr/bin/logbus
 
 ENTRYPOINT ["logbus"]
+#    apk add --update alpine-sdk python-dev zlib-dev bash && \

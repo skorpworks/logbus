@@ -34,3 +34,12 @@ See `make help` for list of helpful targets.
 There are no unit tests yet, only integration tests. Integration tests operate
 against a test payload & config. The config will write results to a file for
 comparison against expected results.
+
+
+### TODO
+
+- Get superagent changes merged upstream or publish to npm so don't have to
+  install git.
+
+- Get ahead of Elasticsearch Common Schema (ECS):
+  https://github.com/elastic/ecs
