@@ -2,6 +2,8 @@
 
 'use strict'
 
+// TODO: Look into https://github.com/blend/promise-utils#readme as replacement for bluebird
+
 const USAGE = `
 Process logs from configured pipeline.
 
@@ -160,7 +162,7 @@ CLI.prototype.loadPipeline = function(stages) {
       }
       logbus.error = (err) => {
         err.stage = name
-        pipeline.emit(stage.errChannel || 'error', err)
+        pipeline.emit(stage.errChannel || 'errors', err)
       },
       this.stages[name] = require('./stage')(name, stage, plugin, logbus)
     }
