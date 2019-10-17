@@ -13,7 +13,7 @@ DOCKER_TAG := $(DOCKER_REPO)/$(NAME):$(VERSION)
 YUM_SERVER := yum.server
 YUM_REPO := /opt/yum
 
-NODE_BIN := $(shell npm bin)
+NODE_BIN := $(shell yarn bin)
 
 
 help: ## show target summary
@@ -28,7 +28,7 @@ help: ## show target summary
 
 
 node_modules: package.json ## install dependencies
-	npm install --no-optional
+	yarn --no-optional
 	touch node_modules
 
 start: VERBOSITY=info# log level

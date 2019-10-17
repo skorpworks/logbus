@@ -1,6 +1,6 @@
 {
   "name": "logbus",
-  "version": "0.7.1",
+  "version": "0.7.7",
   "description": "Log shipper written in Node",
   "directories": {
     "test": "test"
@@ -9,6 +9,9 @@
     "semantic-release": "semantic-release pre && semantic-release post"
   },
   "main": "index.js",
+  "bin": {
+    "logbus": "./index.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/skorpworks/logbus"
@@ -40,7 +43,7 @@
     "simple-get": "^2.4.0",
     "split2": "^2.1.0",
     "stream-throttle": "^0.1.3",
-    "superagent": "erik-stephens/superagent",
+    "superagent": "^4",
     "sync-request": "^6.0.0",
     "tail-forever": "^0.3.13"
   },
