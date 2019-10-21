@@ -41,23 +41,17 @@ etl: node_modules ## run automated tests
 	./index.js -v info examples/elasticsearch-etl/conf.yml | bunyan -o short
 
 
-unittest:
+unit-test: ## run unit tests
 	yarn jest --coverage --color
 
 
-test: node_modules ## run automated tests
+pipeline-test: node_modules ## run pipeline tests
 	@diff -U2 test/dead-ends/out.txt <(./index.js -c test/dead-ends/conf.yml 2>/dev/null)
-	@for dir in $$(ls -d test/* | grep -v dead-ends); do \
-	  if test -f $$dir/conf.yml; then \
-	    echo $$dir; \
-	    ./index.js -v warn $$dir/conf.yml | bunyan -o short && diff -U2 $$dir/expected.json <(jq -S --slurp 'from_entries' < $$dir/out.json); \
-	  fi; \
+	@for dir in test/pipeline/*; do \
+	  pushd $$dir; \
+	  ../../../index.js -v warn conf.yml | bunyan -o short && diff -U2 expected.json <(jq -S --slurp 'from_entries' < out.json); \
+	  popd; \
 	done
-
-
-coverage: ## record coverage metrics
-	$(NODE_BIN)/nyc -n *.js -n lib make test
-	$(NODE_BIN)/nyc report --reporter=html
 
 
 # Not sure how I'd like this automated, so capturing a recipe here for now.

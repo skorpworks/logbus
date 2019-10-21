@@ -5,7 +5,7 @@ pipeline:
     module: file-in
     config:
       globs:
-        - test/skeleton/test.log
+        - test.log
 
   lines:
     inChannels:
@@ -66,7 +66,7 @@ pipeline:
     inChannels:
       - json-output
     config:
-      path: test/skeleton/out.json
+      path: out.json
 
   log-errors:
     module: errors

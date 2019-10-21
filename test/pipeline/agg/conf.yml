@@ -5,7 +5,7 @@ pipeline:
     module: file-in
     config:
       globs:
-        - test/agg/test.log
+        - test.log
 
   lines:
     inChannels:
@@ -128,7 +128,7 @@ pipeline:
     inChannels:
       - json-output
     config:
-      path: test/agg/out.json
+      path: out.json
 
   log-errors:
     module: errors

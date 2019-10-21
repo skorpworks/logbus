@@ -5,63 +5,30 @@ pipeline:
     module: file-in
     config:
       globs:
-        - test/elasticsearch/corrupt.log
-        - test/elasticsearch/multiline.log
-        - test/elasticsearch/shard-failure.log
-
-  custom-input:
-    module: file-in
-    config:
-      globs:
-        - test/elasticsearch/test.log
+        - server.log
 
   default-lines:
     module: lines
     inChannels:
       - default-input
 
-  custom-lines:
-    module: lines
-    inChannels:
-      - custom-input
-
   default-parser:
-    module: elasticsearch-log
+    module: kafka-broker-log
     inChannels:
       - default-lines
 
-  custom-parser:
-    module: elasticsearch-log
-    inChannels:
-      - custom-lines
-    config:
-      parser:
-        regex: '^\[(\S+)\]\s*\[(\S+)\s*\]\s*\[(\S+)\]\s*\[(\S+)\]\s*(.+)$' 
-        fields:
-          - name: ts
-            timestamp: 'YYYY-MM-DDThh:mm:ss,SSS'
-          - name: severity
-          - name: logger
-          - name: node
-          - name: message
-
-  # Mark which events should be rolled up.
+  # Mark which events should be aggregated as one event.
   rollup:
     module: js
     inChannels:
       - default-parser
-      - custom-parser
     config:
       function: !!js/function >-
         function(event) {
           if (event.exception) {
             event._agg = {type: 'count', key: event.exception.type}
           }
-          else if (event.index && event.shard) {
-            event._agg = {type: 'count', key: `${event.index}-${event.shard}`, msg: event.message}
-          }
-          else if (event.logger.match(/(deprecation|^o\.e\.d)/)) {
-            event.deprecation = true
+          else if (event.partition || event.connection) {
             event._agg = {type: 'count', key: event.message}
           }
           return event
@@ -114,9 +81,21 @@ pipeline:
             event.message = this.util.format('%dx: %s', event.count, event.message)
             event.exception.stack = event.exception.stack.slice(0, 5)
           }
+          else if (event.partition) {
+            // Preserve partitions.
+            event.message = this.util.format('%dx: %s', event.count, event.message)
+            event.partitions = events.map(i => i.partition)
+            delete event.partition
+          }
+          else if (event.connection) {
+            // Preserve connections.
+            event.message = this.util.format('%dx: %s', event.count, event.message)
+            event.connections = events.map(i => i.connection)
+            delete event.connection
+          }
           else {
             // Assume original message in aggregation key.
-            event.message = this.util.format('%dx: %s', event.count, event._agg.msg || event._agg.key)
+            event.message = this.util.format('%dx: %s', event.count, event._agg.key)
           }
           delete event._agg
           return event
@@ -147,7 +126,7 @@ pipeline:
     inChannels:
       - json-output
     config:
-      path: test/elasticsearch/out.json
+      path: out.json
 
   log-errors:
     module: errors

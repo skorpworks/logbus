@@ -1,4 +1,4 @@
-test/*/out.json
+test/pipeline/*/out.json
 .DS_Store
 .grunt
 .logbus
