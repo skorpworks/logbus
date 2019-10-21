@@ -19,6 +19,11 @@
   "bugs": {
     "url": "https://github.com/skorpworks/logbus/issues"
   },
+  "jest": {
+    "testMatch": [
+      "**/test/unit/**/*-spec.js"
+    ]
+  },
   "keywords": [
     "log management",
     "log parser",
@@ -54,8 +59,9 @@
     "eslint-plugin-node": "^5.2.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
+    "jest": "^24.9.0",
     "jsdoc": "^3.5.5",
-    "nyc": "^13.3.0",
+    "nock": "^11.4.0",
     "semantic-release": "^15.8.1"
   }
 }

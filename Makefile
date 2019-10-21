@@ -1,4 +1,4 @@
-.PHONY: help test test-kafka test-tail coverage docker-build docker-publish rpm-publish
+.PHONY: help test unittest test-kafka test-tail coverage docker-build docker-publish rpm-publish
 .DEFAULT_GOAL := help
 
 SHELL := /bin/bash
@@ -39,6 +39,10 @@ start: node_modules ## start logbus
 
 etl: node_modules ## run automated tests
 	./index.js -v info examples/elasticsearch-etl/conf.yml | bunyan -o short
+
+
+unittest:
+	yarn jest --coverage --color
 
 
 test: node_modules ## run automated tests
