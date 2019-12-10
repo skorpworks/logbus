@@ -163,20 +163,20 @@ CLI.prototype.loadPipeline = function(stages) {
       logbus.error = (err) => {
         err.stage = name
         pipeline.emit(stage.errChannel || 'errors', err)
-      },
+      }
       this.stages[name] = require('./stage')(name, stage, plugin, logbus)
     }
     catch (err) {
       this.log.error(err, 'failed to load stage: %s', name)
     }
-  });
+  })
   _.each(this.stages, (stage, name) => {
     stage.inputs(this.stages).forEach((input) => {
       this.log.debug(util.format('%s waits on %s', name, input))
       stage.waitOn(input)
       this.pipeline.once(input + '.stopped', stage.stop.bind(stage, input))
-    });
-  });
+    })
+  })
 }
 
 CLI.prototype.pipelinePaths = function() {
@@ -219,7 +219,6 @@ CLI.prototype.pipelinePaths = function() {
   }
   const paths = []
   _.each(this.stages, (stage, name) => {
-    var stage = this.stages[name]
     if (stage.outputs(stages).length === 0) {
       // Start at stages with no outputs and work our way back.
       let i
