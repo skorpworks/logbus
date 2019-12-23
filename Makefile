@@ -93,7 +93,7 @@ docker-publish: ## publish docker image to repo
 
 
 lint: ## check code for errors
-	$(NODE_BIN)/eslint lib *.js
+	$(NODE_BIN)/eslint --format unix lib *.js
 
 
 RELEASE := $(shell echo $$(( $$(rpm -qp --qf %{RELEASE} rpm 2>/dev/null) + 1)))
