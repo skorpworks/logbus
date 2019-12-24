@@ -37,14 +37,22 @@ const Logbus = (stage) => {
   const pipeline = new EventEmitter()
   const shutdownReasons = []
   pipeline.on('SIGTERM', (reason) => {
-    // console.log('YOU GO IT!', reason, this, shutdownReasons)
     shutdownReasons.push(reason)
   })
 
   // pretend entire pipeline started
   ready = true
 
-  return { stage, pipeline, ready, shutdownReasons, log, logs, error, errors, event, events, stats, _stats }
+  // helper for test cases
+  async function wait(ms, f) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(f())
+      }, ms)
+    })
+  }
+
+  return { stage, pipeline, ready, wait, shutdownReasons, log, logs, error, errors, event, events, stats, _stats }
 }
 
 module.exports = { Logbus }
