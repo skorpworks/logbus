@@ -34,20 +34,20 @@ module.exports = (name, props, plugin, logbus) => {
     }
   }
 
-  const stop = (input) => {
-    function cb() {
-      logbus.pipeline.emit(name + '.stopped', name)
-      stopped = true
-    }
+  async function stop(input) {
     delete waitingOn[input]
     if (Object.keys(waitingOn).length === 0) {
       logbus.log.info('stopping via', input || 'SHUTDOWN')
       if (plugin.stop) {
-        plugin.stop(cb)
+        try {
+          await plugin.stop()
+        }
+        catch (err) {
+          logbus.log.error(err, {stage: name}, 'failed to stop')
+        }
       }
-      else {
-        cb()
-      }
+      logbus.pipeline.emit(name + '.stopped', name)
+      stopped = true
     }
   }
 
