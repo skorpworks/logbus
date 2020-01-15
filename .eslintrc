@@ -16,4 +16,4 @@ plugins:
 overrides:
   - files: "**/*-spec.js"
     extends:
-    - "plugin:jest/all"
+    - "plugin:jest/recommended"
