@@ -3,30 +3,39 @@ FROM ubuntu:18.04
 
 WORKDIR /opt/logbus
 
-# Need git for my superagent.
-RUN apt-get update && apt-get install -y nodejs npm git && rm -rf /var/lib/apt/lists/*
+# systemd pkg needed for journal input plugin
+RUN \
+  apt-get update \
+  && apt-get install -y nodejs npm curl systemd strace \
+  && rm -rf /var/lib/apt/lists/*
 
-ARG KAFKA
-RUN if test -n "${KAFKA}"; then \
-  apt-get update && apt-get install -y build-essential python-dev && rm -rf /var/lib/apt/lists/* && \
-  npm install node-rdkafka@${KAFKA}; \
-  fi
+RUN \
+  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add \
+  && echo 'deb https://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list \
+  && apt-get update \
+  && apt-get install -y yarn \
+  && rm -rf /var/lib/apt/lists/*
 
-ARG ALASQL
-RUN if test -n "${ALASQL}"; then npm install alasql@${ALASQL}; fi
-
-ARG MAXMIND
-RUN if test -n "${MAXMIND}"; then npm install maxmind-db-reader@${MAXMIND}; fi
-
-RUN apt-get update && apt-get install -y systemd strace && rm -rf /var/lib/apt/lists/*
-
-# Add node modules in a way that will allow Docker to cache them.
+ENV NODE_ENV production
 ADD package.json .
-ADD package-lock.json .
-RUN npm install --no-optional --only=prod
+RUN yarn --ignore-engines --ignore-optional && yarn cache clean
 ADD lib lib
 ADD stage.js .
 ADD index.js .
+
+ARG KAFKA
+RUN if test -n "${KAFKA}"; then \
+  apt-get update \
+  && apt-get install -y build-essential python-dev \
+  && rm -rf /var/lib/apt/lists/* \
+  && yarn add --no-lockfile node-rdkafka@${KAFKA}; \
+  fi
+
+ARG ALASQL
+RUN if test -n "${ALASQL}"; then yarn add --no-lockfile alasql@${ALASQL}; fi
+
+ARG MAXMIND
+RUN if test -n "${MAXMIND}"; then yarn add --no-lockfile maxmind-db-reader@${MAXMIND}; fi
 
 # The `bin` in package.json doesn't work since node_modules in .dockerignore
 #

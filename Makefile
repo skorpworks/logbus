@@ -10,9 +10,6 @@ MAINTAINER := foo@bar.com
 DOCKER_REPO := docker.repo
 DOCKER_TAG := $(DOCKER_REPO)/$(NAME):$(VERSION)
 
-YUM_SERVER := yum.server
-YUM_REPO := /opt/yum
-
 NODE_BIN := $(shell yarn bin)
 
 
@@ -31,21 +28,20 @@ node_modules: package.json ## install dependencies
 	yarn --no-optional
 	touch node_modules
 
-start: VERBOSITY=info# log level
-start: CONF=config/test.yml# logbus config file
-start: node_modules ## start logbus
-	./index.js -v $(VERBOSITY) $(CONF) -c
 
-
-etl: node_modules ## run automated tests
-	./index.js -v info examples/elasticsearch-etl/conf.yml | bunyan -o short
+lint: ## check code for errors
+	$(NODE_BIN)/eslint --format unix lib *.js
 
 
 unit-test: ## run unit tests
 	yarn jest --coverage --color
 
 
-pipeline-test: node_modules ## run pipeline tests
+example-etl: node_modules ## run etl example
+	./index.js -v info examples/elasticsearch-etl/conf.yml | bunyan -o short
+
+
+e2e-files: node_modules ## run e2e tests of file inputs & outputs
 	@diff -U2 test/dead-ends/out.txt <(./index.js -c test/dead-ends/conf.yml 2>/dev/null)
 	@for dir in test/pipeline/*; do \
 	  pushd $$dir; \
@@ -55,30 +51,39 @@ pipeline-test: node_modules ## run pipeline tests
 
 
 # Not sure how I'd like this automated, so capturing a recipe here for now.
-test-kafka: DOCKER=# run logbus in container instead of host
-test-kafka: ## test kafka plugins
+e2e-kafka: DOCKER=# run logbus in container instead of host
+e2e-kafka: ## run end-to-end tests of kafka inputs & outputs
 	@docker rm -f logbus-test-kafka > /dev/null 2> /dev/null || true
 	@docker run -d --name logbus-test-kafka -p 2181:2181 -p 9092:9092 -e ADVERTISED_HOST=127.0.0.1 -e ADVERTISED_PORT=9092 spotify/kafka@sha256:cf8f8f760b48a07fb99df24fab8201ec8b647634751e842b67103a25a388981b > /dev/null
 	@echo waiting for kafka to start...
 	@sleep 5
 	@if test -e test/kafka/out.json; then rm test/kafka/out.json; fi
 ifdef DOCKER
-	make docker-build KAFKA=yeee
+	make docker-build KAFKA=2.7.4
 	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) -v info /test/kafka/producer.yml | bunyan -o short
 	docker run --rm -v $$PWD/test/kafka:/test/kafka --network host $(NAME) -v info /test/kafka/consumer.yml | bunyan -o short
 else
 	./index.js -v info test/kafka/producer.yml | bunyan -o short
 	./index.js -v info test/kafka/consumer.yml | bunyan -o short
 endif
-	@test 1 == $$(jq '.value.channel | select(. == "odd")' test/kafka/out.json | wc -l)
-	@test 2 == $$(jq '.value.channel | select(. == "even")' test/kafka/out.json | wc -l)
+	test 1 == $$(jq '.value.channel | select(. == "odd")' test/kafka/out.json | wc -l)
+	test 2 == $$(jq '.value.channel | select(. == "even")' test/kafka/out.json | wc -l)
 	@docker rm -f logbus-test-kafka > /dev/null
 
 
 # Not sure how I'd like this automated, so capturing a recipe here for now.
-test-tail: ## test tail plugin
-	./index.js -v debug test/tail/play.yml | bunyan -o short
-	jq '.' test/tail/play.db
+e2e-elasticsearch: DOCKER=# run logbus in container instead of host
+e2e-elasticsearch: ## run end-to-end tests of elasticsearch inputs & outputs
+	docker rm -f logbus-e2e-elasticsearch > /dev/null 2> /dev/null || true
+	docker run -d --name logbus-e2e-elasticsearch -p 9200 elasticsearch:6.6.2 > /dev/null
+	@echo waiting for elasticsearch to start...
+	curl -sS --connect-timeout 60 http://$$(docker port logbus-e2e-elasticsearch 9200) | jq -r '.version.number' | grep -Fq '6.6.2'
+ifdef DOCKER
+	docker run --rm -v $$PWD/test/elasticsearch:/conf --network host $(NAME) -v info /conf/dynamic-index.yml | bunyan -o short
+else
+	./index.js -v info test/elasticsearch/dynamic-index.yml | bunyan -o short
+endif
+	@docker rm -f logbus-e2e-elasticsearch > /dev/null
 
 
 docker-build: KAFKA=# with kafka support
@@ -92,11 +97,7 @@ docker-publish: ## publish docker image to repo
 	docker push $(DOCKER_TAG)
 
 
-lint: ## check code for errors
-	$(NODE_BIN)/eslint --format unix lib *.js
-
-
-RELEASE := $(shell echo $$(( $$(rpm -qp --qf %{RELEASE} rpm 2>/dev/null) + 1)))
+rpm: RELEASE := $(shell echo $$(( $$(rpm -qp --qf %{RELEASE} rpm 2>/dev/null) + 1)))
 rpm: Makefile lib index.js node_modules ## build rpm
 	rsync -va package.json pkg/opt/logbus/package.json
 	rsync -va --exclude test/ --exclude alasql/utils/ node_modules/ --delete-excluded pkg/opt/logbus/node_modules/
@@ -111,6 +112,8 @@ rpm: Makefile lib index.js node_modules ## build rpm
 	  --rpm-summary 'Log shipper' --url https://github.com/skorpworks/logbus --rpm-changelog CHANGELOG
 
 
+rpm-publish: YUM_SERVER=yum.server
+rpm-publish: YUM_REPO=/opt/yum
 rpm-publish: rpm ## publish rpm to yum server
 	scp rpm $(YUM_SERVER):$(YUM_REPO)/Packages/$(shell rpm -qp --qf %{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}.rpm rpm)
 	ssh $(YUM_SERVER) createrepo --update $(YUM_REPO)
