@@ -6,12 +6,11 @@ pipeline:
   extract:
     module: elasticsearch-in
     config:
+      index: logbus-etl-in
+      scroll: 1m
       search:
-        index: logbus-etl-in
-        scroll: 1m
         size: 1000
-      hosts:
-        - http://localhost:9200
+      endpoint: http://localhost:9200
 
   transform:
     module: js
@@ -35,8 +34,7 @@ pipeline:
     config:
       bufferSize: 1000
       index: logbus-etl-out
-      hosts:
-        - http://localhost:9200
+      endpoint: http://localhost:9200
 
   # If would like to snoop on a subset of the data.
   #
@@ -52,7 +50,7 @@ pipeline:
     inChannels:
       - errors
     config:
-      interval: 5
+      intervalSeconds: 5
       stackDepth: 6
 
   log-stats:
