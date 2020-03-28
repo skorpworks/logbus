@@ -1,0 +1,140 @@
+{
+  "2018-05-07T16:10:38.635Z": {
+    "connections": [
+      "10.0.0.2:9092-10.0.1.80:34048-6418",
+      "10.0.0.2:9092-10.0.1.228:53906-6418",
+      "10.0.0.2:9092-10.0.1.228:53910-6418"
+    ],
+    "count": 3,
+    "duration": 54,
+    "end": "2018-05-07T16:11:32.457Z",
+    "logger": "kafka.network.Processor",
+    "message": "3x: Attempting to send response via channel for which there is no open connection",
+    "severity": "WARN",
+    "ts": "2018-05-07T16:10:38.635Z"
+  },
+  "2018-05-07T16:14:34.258Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-05-07T16:14:34.258Z",
+    "exception": {
+      "message": "Connection to 1 was disconnected before the response was read",
+      "stack": [
+        "        at org.apache.kafka.clients.NetworkClientUtils.sendAndReceive(NetworkClientUtils.java:95)",
+        "        at kafka.server.ReplicaFetcherBlockingSend.sendRequest(ReplicaFetcherBlockingSend.scala:96)",
+        "        at kafka.server.ReplicaFetcherThread.fetch(ReplicaFetcherThread.scala:205)",
+        "        at kafka.server.ReplicaFetcherThread.fetch(ReplicaFetcherThread.scala:41)",
+        "        at kafka.server.AbstractFetcherThread.processFetchRequest(AbstractFetcherThread.scala:149)"
+      ],
+      "type": "java.io.IOException"
+    },
+    "extra": {
+      "fetcherId": "0",
+      "leaderId": "1",
+      "message": "ReplicaFetcher",
+      "replicaId": "3"
+    },
+    "logger": "kafka.server.ReplicaFetcherThread",
+    "message": "1x: Error in fetch to broker 1, request (type=FetchRequest, replicaId=3, maxWait=500, minBytes=1, maxBytes=10485760, fetchData={__consumer_offsets-0=(offset=299678454, logStartOffset=187457977, maxBytes=1048576), __consumer_offsets-1=(offset=299923454, logStartOffset=187412386, maxBytes=1048576)}, isolationLevel=READ_UNCOMMITTED)",
+    "severity": "WARN",
+    "ts": "2018-05-07T16:14:34.258Z"
+  },
+  "2018-05-07T17:49:46.476Z": {
+    "count": 3,
+    "duration": 0,
+    "end": "2018-05-07T17:49:46.676Z",
+    "extra": {
+      "id": "3",
+      "message": "Broker"
+    },
+    "logger": "state.change.logger",
+    "message": "3x: Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 5 for partition since its associated leader epoch 0 is not higher than the current leader epoch 0",
+    "partitions": [
+      "foo-0",
+      "bar-0",
+      "foo-1"
+    ],
+    "severity": "WARN",
+    "ts": "2018-05-07T17:49:46.476Z"
+  },
+  "2018-05-07T17:49:47.776Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-05-07T17:49:47.776Z",
+    "extra": {
+      "id": "3",
+      "message": "Broker"
+    },
+    "logger": "state.change.logger",
+    "message": "1x: Skipped the become-follower state change after marking its partition as follower with correlation id 1 from controller 2 epoch 5 for partition (last update controller epoch 5) since the new leader 2 is the same as the old leader",
+    "partitions": [
+      "__consumer_offsets-0"
+    ],
+    "severity": "INFO",
+    "ts": "2018-05-07T17:49:47.776Z"
+  },
+  "2018-06-07T17:44:03.233Z": {
+    "connections": [
+      "10.17.0.2:9092-10.228.1.85:45858-62966",
+      "10.17.0.2:9092-10.228.1.85:45858-62966",
+      "10.17.0.2:9092-10.228.1.85:45858-62966"
+    ],
+    "count": 3,
+    "duration": 2,
+    "end": "2018-06-07T17:44:05.235Z",
+    "logger": "kafka.network.Processor",
+    "message": "3x: Attempting to send response via channel for which there is no open connection",
+    "severity": "WARN",
+    "ts": "2018-06-07T17:44:03.233Z"
+  },
+  "2018-06-07T23:21:38.862Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-06-07T23:21:38.862Z",
+    "extra": {
+      "id": "4",
+      "message": "Broker"
+    },
+    "logger": "state.change.logger",
+    "message": "1x: Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 25 for partition since its associated leader epoch 16 is not higher than the current leader epoch 16",
+    "partitions": [
+      "foo-19"
+    ],
+    "severity": "WARN",
+    "ts": "2018-06-07T23:21:38.862Z"
+  },
+  "2018-06-28T00:00:42.806Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-06-28T00:00:42.806Z",
+    "extra": {
+      "dir": "/data",
+      "message": "Log"
+    },
+    "logger": "kafka.log.Log",
+    "message": "1x: Incrementing log start offset to 1234",
+    "partitions": [
+      "foo-42"
+    ],
+    "severity": "INFO",
+    "ts": "2018-06-28T00:00:42.806Z"
+  },
+  "2018-06-28T00:00:42.811Z": {
+    "count": 1,
+    "duration": 0,
+    "end": "2018-06-28T00:00:42.811Z",
+    "logger": "kafka.server.epoch.LeaderEpochFileCache",
+    "message": "1x: Cleared earliest 0 entries from epoch cache based on passed offset 1234 leaving 2 in EpochFile for partition",
+    "partitions": [
+      "foo-42"
+    ],
+    "severity": "INFO",
+    "ts": "2018-06-28T00:00:42.811Z"
+  },
+  "2018-06-28T00:03:05.944Z": {
+    "logger": "kafka.log.LogSegment",
+    "message": "Deleted offset index /data/foo-42/00000000000000127487.index.deleted.",
+    "severity": "INFO",
+    "ts": "2018-06-28T00:03:05.944Z"
+  }
+}

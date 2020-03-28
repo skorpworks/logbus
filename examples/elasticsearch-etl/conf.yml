@@ -1,0 +1,65 @@
+
+# Example [re]index / ETL with elasticsearch as source.
+
+pipeline:
+
+  extract:
+    module: elasticsearch-in
+    config:
+      index: logbus-etl-in
+      scroll: 1m
+      search:
+        size: 1000
+      endpoint: http://localhost:9200
+
+  transform:
+    module: js
+    inChannels:
+      - extract
+    config:
+      function: !!js/function >-
+        function(doc) {
+          // preserve id and deal with lack of types in 6.x
+          const event = doc._source
+          event.kind = doc._type
+          event._id = doc._id
+          return event
+        }
+
+  load:
+    module: elasticsearch-out
+    inChannels:
+      - transform
+    outChannels: []
+    config:
+      bufferSize: 1000
+      index: logbus-etl-out
+      endpoint: http://localhost:9200
+
+  # If would like to snoop on a subset of the data.
+  #
+  # log-sample:
+  #   module: sample
+  #   inChannels:
+  #     - transform
+  #   config:
+  #     nth: 1000
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      intervalSeconds: 5
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+
+  log:
+    inChannels:
+      # - log-sample
+      - log-errors
+      - log-stats

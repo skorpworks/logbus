@@ -27,7 +27,7 @@ pipeline:
           return event.y % 2 === 0 ? 'even' : 'odd'
         }
       debug: broker,topic,msg
-      interval: 100
+      intervalSeconds: 0.1
       compression: gzip
 
   log-errors:
@@ -35,7 +35,7 @@ pipeline:
     inChannels:
       - errors
     config:
-      interval: 5
+      intervalSeconds: 5
       stackDepth: 6
 
   log-stats:

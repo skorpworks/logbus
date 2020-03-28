@@ -1,0 +1,169 @@
+
+pipeline:
+
+  default-input:
+    module: file-in
+    config:
+      globs:
+        - corrupt.log
+        - multiline.log
+        - shard-failure.log
+
+  custom-input:
+    module: file-in
+    config:
+      globs:
+        - test.log
+
+  default-lines:
+    module: lines
+    inChannels:
+      - default-input
+
+  custom-lines:
+    module: lines
+    inChannels:
+      - custom-input
+
+  default-parser:
+    module: elasticsearch-log
+    inChannels:
+      - default-lines
+
+  custom-parser:
+    module: elasticsearch-log
+    inChannels:
+      - custom-lines
+    config:
+      parser:
+        regex: '^\[(\S+)\]\s*\[(\S+)\s*\]\s*\[(\S+)\]\s*\[(\S+)\]\s*(.+)$' 
+        fields:
+          - name: ts
+            timestamp: 'YYYY-MM-DDThh:mm:ss,SSS'
+          - name: severity
+          - name: logger
+          - name: node
+          - name: message
+
+  # Mark which events should be rolled up.
+  rollup:
+    module: js
+    inChannels:
+      - default-parser
+      - custom-parser
+    config:
+      function: !!js/function >-
+        function(event) {
+          if (event.exception) {
+            event._agg = {type: 'count', key: event.exception.type}
+          }
+          else if (event.index && event.shard) {
+            event._agg = {type: 'count', key: `${event.index}-${event.shard}`, msg: event.message}
+          }
+          else if (event.logger.match(/(deprecation|^o\.e\.d)/)) {
+            event.deprecation = true
+            event._agg = {type: 'count', key: event.message}
+          }
+          return event
+        }
+
+  unaggregated:
+    module: js
+    inChannels:
+      - rollup
+    config:
+      function: !!js/function >-
+        function(event) {
+          if (event._agg === undefined) {
+            return event
+          }
+        }
+
+  count-aggregated:
+    module: agg
+    inChannels:
+      - rollup
+    config:
+      maxSize: 1000
+      maxRealSeconds: 300
+      maxEventSeconds: 3600
+      filtered: !!js/function >-
+        function(event) {
+          return event._agg === undefined || event._agg.type !== 'count'
+        }
+      start: !!js/function >-
+        function(event) {
+          return true // let size or time trigger aggregation
+        }
+      stop: !!js/function >-
+        function(event) {
+          return false // let size or time trigger aggregation
+        }
+      key: !!js/function >-
+        function(event) {
+          return event._agg.key
+        }
+      view: !!js/function >-
+        function(events) {
+          var event = events[0] // assuming grouped events are similar enough
+          event.end = events[events.length-1].ts
+          event.duration = Math.round((event.end - event.ts) / 1000)
+          event.count = events.length
+          if (event.exception) {
+            // Preserve message & exception. 
+            event.message = this.util.format('%dx: %s', event.count, event.message)
+            event.exception.stack = event.exception.stack.slice(0, 5)
+          }
+          else {
+            // Assume original message in aggregation key.
+            event.message = this.util.format('%dx: %s', event.count, event._agg.msg || event._agg.key)
+          }
+          delete event._agg
+          return event
+        }
+
+  # Remove variable & environment specific data and transform to format that is
+  # easier for `jq` to produce deterministic results.
+  testify:
+    module: js
+    inChannels:
+      - unaggregated
+      - count-aggregated
+    config:
+      function: !!js/function >-
+        function(event) {
+          delete event.shipper
+          delete event.host
+          return {key: event.ts.toISOString(), value: event}
+        }
+
+  json-output:
+    module: json-out
+    inChannels:
+      - testify
+
+  test-output:
+    module: file-out
+    inChannels:
+      - json-output
+    config:
+      path: out.json
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      intervalSeconds: 5
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+
+  log:
+    inChannels:
+      - log
+      - log-errors
+      - log-stats

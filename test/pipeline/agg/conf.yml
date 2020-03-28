@@ -1,0 +1,150 @@
+
+pipeline:
+
+  test-input:
+    module: file-in
+    config:
+      globs:
+        - test.log
+
+  lines:
+    inChannels:
+      - test-input
+
+  json-in:
+    inChannels:
+      - lines
+
+  parse:
+    module: js
+    inChannels:
+      - json-in
+    config:
+      function: !!js/function >-
+        function(event) {
+          // Mark which events should be aggregated.
+          if (event.process === 'noisy-app') {
+            event._agg = {type: 'count', key: event.msg}
+          }
+          else if (event.process === 'some-app') {
+            event._agg = {type: 'mark', key: event.process}
+          }
+          return event
+        }
+
+  not-aggregated:
+    module: js
+    inChannels:
+      - parse
+    config:
+      function: !!js/function >-
+        function(event) {
+          if (!event._agg) {
+            return event
+          }
+        }
+
+  count-aggregated:
+    module: agg
+    inChannels:
+      - parse
+    config:
+      maxSize: 1000
+      maxRealSeconds: 300
+      maxEventSeconds: 3600
+      filtered: !!js/function >-
+        function(event) {
+          return event._agg === undefined || event._agg.type !== 'count'
+        }
+      key: !!js/function >-
+        function(event) {
+          return event._agg.key
+        }
+      view: !!js/function >-
+        function(events) {
+          const event = events[0] // assuming grouped events are similar enough
+          event.end = events[events.length-1].ts
+          event.count = events.length
+          event.msg = event.msg
+          delete event._agg
+          return event
+        }
+
+  mark-aggregated:
+    module: agg
+    inChannels:
+      - parse
+    config:
+      maxSize: 1000
+      maxRealSeconds: 300
+      maxEventSeconds: 3600
+      start: !!js/function >-
+        function(event) {
+          return event.msg.match(/^start/i)
+        }
+      stop: !!js/function >-
+        function(event) {
+          return event.msg.match(/^(stop|finish|complet)/i)
+        }
+      filtered: !!js/function >-
+        function(event) {
+          return event._agg === undefined || event._agg.type !== 'mark'
+        }
+      key: !!js/function >-
+        function(event) {
+          return event._agg.key
+        }
+      view: !!js/function >-
+        function(events) {
+          const event = events[0] // assuming grouped events are similar enough
+          event.end = events[events.length-1].ts
+          event.count = events.length
+          event.msg = events.map(i => i.msg).join("\n")
+          delete event._agg
+          return event
+        }
+
+  # Remove variable & environment specific data and transform to format that is
+  # easier for `jq` to produce deterministic results.
+  testify:
+    module: js
+    inChannels:
+      - not-aggregated
+      - count-aggregated
+      - mark-aggregated
+    config:
+      function: !!js/function >-
+        function(event) {
+          return {key: `${event.process}:${event.ts}`, value: event}
+        }
+
+  json-output:
+    module: json-out
+    inChannels:
+      - testify
+
+  test-output:
+    module: file-out
+    inChannels:
+      - json-output
+    config:
+      path: out.json
+
+  log-errors:
+    module: errors
+    inChannels:
+      - errors
+    config:
+      intervalSeconds: 5
+      stackDepth: 6
+
+  log-stats:
+    module: stats
+    inChannels:
+      - stats
+
+  log:
+    inChannels:
+      - log
+      - log-errors
+      - log-stats

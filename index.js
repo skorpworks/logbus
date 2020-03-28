@@ -2,7 +2,9 @@
 
 'use strict'
 
-var USAGE = `
+// TODO: Look into https://github.com/blend/promise-utils#readme as replacement for bluebird
+
+const USAGE = `
 Process logs from configured pipeline.
 
 Usage: COMMAND [options] <config>
@@ -12,38 +14,50 @@ Options:
     trace, debug, info, warn, error, fatal [default: warn]
   -c, --check
     Validate pipeline
+  --timeout SECONDS
+    How long to give stages to stop on pipeline shutdown [default: 10]
 `
+
+const EXITS = {
+  SUCCESS: 0,
+  CONFIG: 1,
+  TIMEOUT: 2,
+  START: 21,
+  EXCEPTION: 42,
+}
 
 // Exit non-success on unhandled exception, particularly useful so supervisors
 // can restart the service when configured to do so.
 // TODO: should attempt a clean shutdown first
 process.on('uncaughtException', function (err) {
   console.error(err)
-  process.exit(42)
+  process.exit(EXITS.EXCEPTION)
 })
 
 const EventEmitter = require('eventemitter3')
+const Promise = require('bluebird')
 const util = require('util')
-const lodash = require('lodash')
 const path = require('path')
+const _ = require('lodash')
 
-var MODULES = {
+const MODULES = {
   'file-in': './lib/plugins/input/file',
   'file-out': './lib/plugins/output/file',
-  'json-in': './lib/plugins/input/json',
-  'json-out': './lib/plugins/output/json',
+  'json-in': './lib/plugins/parse/json',
+  'json-out': './lib/plugins/serialize/json',
   'tcp-in': './lib/plugins/input/tcp',
   journal: './lib/plugins/input/journal',
   tail: './lib/plugins/input/tail',
-  'yaml-in': './lib/plugins/input/yaml',
-  'yaml-out': './lib/plugins/output/yaml',
+  'yaml-in': './lib/plugins/parse/yaml',
+  'yaml-out': './lib/plugins/serialize/yaml',
   agg: './lib/plugins/agg',
   cast: './lib/plugins/cast',
   drop: './lib/plugins/drop-fields',
-  // 'elasticsearch-in': './lib/plugins/input/elasticsearch',
-  'elasticsearch-log': './lib/plugins/elasticsearch',
+  'elasticsearch-in': './lib/plugins/input/elasticsearch',
+  'elasticsearch-log': './lib/plugins/parse/elasticsearch',
   'elasticsearch-out': './lib/plugins/output/elasticsearch',
   elasticsearch: './lib/plugins/output/elasticsearch', // DEPRECATED
+  'kafka-broker-log': './lib/plugins/parse/kafka-broker',
   'kafka-in': './lib/plugins/input/kafka',
   'kafka-out': './lib/plugins/output/kafka',
   errors: './lib/plugins/errors',
@@ -52,7 +66,7 @@ var MODULES = {
   geopop: './lib/plugins/geopop',
   js: './lib/plugins/js',
   keep: './lib/plugins/keep-fields',
-  lines: './lib/plugins/input/lines',
+  lines: './lib/plugins/parse/lines',
   log: './lib/plugins/log',
   pass: './lib/plugins/pass',
   rename: './lib/plugins/rename-fields',
@@ -60,15 +74,16 @@ var MODULES = {
   sql: './lib/plugins/sql',
   stats: './lib/plugins/stats',
   stdin: './lib/plugins/input/stdin',
-  stdout: './lib/plugins/output/stdout'
+  stdout: './lib/plugins/output/stdout',
 }
 
 function CLI() {
-  var bunyan = require('bunyan')
-  var argv = require('docopt').docopt(USAGE)
-  var config = require('js-yaml').load(require('fs').readFileSync(argv['<config>'], 'utf8'));
+  const bunyan = require('bunyan')
+  const argv = require('docopt').docopt(USAGE)
+  const config = require('js-yaml').load(require('fs').readFileSync(argv['<config>'], 'utf8'))
   this.log = bunyan.createLogger({name: process.argv[1].split('/').pop(), level: bunyan[argv['--verbosity'].toUpperCase()]})
   process.setMaxListeners(Infinity)
+  // TODO: overloading the use of "pipeline" is confusing
   this.pipeline = new EventEmitter()
   // Stages will use `SIGTERM` event to signal pipeline to shut down.
   this.pipeline.on('SIGTERM', this.shutdown.bind(this))
@@ -80,10 +95,10 @@ function CLI() {
     this.loadPlugins(path.resolve(path.dirname(argv['<config>'])), config.plugins)
   }
   this.loadPipeline(config.pipeline)
-  var invalid = {}
-  for (var stages of this.pipelinePaths()) {
-    var start = stages.shift()
-    var end = stages.pop() || start
+  const invalid = {}
+  this.pipelinePaths().forEach((stages) => {
+    const start = stages.shift()
+    const end = stages.pop() || start
     if (start.reason === 'DEADEND') {
       invalid[start.name] = 'DEADEND'
     }
@@ -93,158 +108,94 @@ function CLI() {
     if (argv['--check']) {
       console.log()
       console.log(start.reason, ':', start.name)
-      for (var stage of stages) {
+      _.each(stages, (stage, name) => {
         console.log('  - %s', stage.name)
-      }
+      })
       console.log(end.reason, ':', end.name)
     }
-  }
-  if (Object.keys(invalid).length > 0) {
-    throw new Error('invalid stages: ' + JSON.stringify(invalid, null, 2))
-  }
-  if (! argv['--check']) {
+    else if (!_.isEmpty(invalid)) {
+      this.log.error(invalid, 'invalid stages')
+      process.exit(EXITS.CONFIG)
+    }
+  })
+  if (!argv['--check']) {
     this.startPipeline()
   }
+  this.shutdownTimeout = parseFloat(argv['--timeout']) * 1000
 }
 
 CLI.prototype.loadPlugins = function(basedir, plugins) {
-  for (var name in plugins) {
-    MODULES[name] = plugins[name].path
+  _.each(plugins, (props, name) => {
+    MODULES[name] = props.path
     if (MODULES[name][0] !== '/') {
       MODULES[name] = path.join(basedir, MODULES[name])
     }
-  }
+  })
 }
 
 CLI.prototype.loadPipeline = function(stages) {
   this.stages = {}
-  for (var name in stages) {
-    var props = stages[name]
+  _.each(stages, (stage, name) => {
+    if (!stage.module) {
+      stage.module = name
+    }
+    const pipeline = this.pipeline
     try {
-      this.stages[name] = new Stage(name, props, this.pipeline, this.log.child({stage: name}))
+      // The logbus api exposed to plugins.
+      const logbus = {
+        ready: false,
+        stage: name,
+        log: this.log.child({stage: name}),
+        pipeline: this.pipeline,
+      }
+      const plugin = require(MODULES[stage.module] || stage.module)(stage.config || {}, logbus)
+      // TODO: This sucks - all kinds of odd coupling twix stage, plugin, and logbus instance
+      stage.outChannels = stage.outChannels || plugin.outChannels || [name]
+      logbus.event = (event) => {
+        if (event) {
+          stage.outChannels.forEach(chan => pipeline.emit(chan, event, name))
+        }
+      }
+      logbus.stats = (data) => {
+        data.stage = name
+        pipeline.emit(stage.statsChannel || 'stats', data)
+      }
+      logbus.error = (err) => {
+        err.stage = name
+        pipeline.emit(stage.errChannel || 'errors', err)
+      }
+      this.stages[name] = require('./stage')(name, stage, plugin, logbus)
     }
     catch (err) {
       this.log.error(err, 'failed to load stage: %s', name)
     }
-  }
-  for (var name in this.stages) {
-    var stage = this.stages[name]
-    for (var input of stage.inputs(this.stages)) {
+  })
+  _.each(this.stages, (stage, name) => {
+    stage.inputs(this.stages).forEach((input) => {
       this.log.debug(util.format('%s waits on %s', name, input))
       stage.waitOn(input)
       this.pipeline.once(input + '.stopped', stage.stop.bind(stage, input))
-    }
-  }
-}
-
-var Stage = function(name, stage, pipeline, log) {
-  this.log = log
-  this.name = name
-  this.pipeline = pipeline
-  this.module = stage.module || name
-  var Plugin = require(MODULES[this.module] || this.module)
-  this.plugin = new Plugin(stage.config || {})
-  this.plugin.log = this.log
-  this.plugin.pipeline = this.pipeline
-  this.plugin.emitEvent = this.emitEvent.bind(this)
-  this.plugin.emitError = this.emitError.bind(this)
-  this.plugin.emitStats = this.emitStats.bind(this)
-  this.inChannels = stage.inChannels || []
-  this.outChannels = stage.outChannels
-  if (this.outChannels === undefined) {
-    this.outChannels = this.plugin.outChannels || [name]
-  }
-  this.statsChannel = stage.statsChannel || 'stats'
-  this.errChannel = stage.errChannel || 'errors'
-  this.isInput = this.inChannels.length === 0
-  this.isOutput = this.outChannels.length === 0
-  this.isErrors = this.module === 'errors'
-  this.isStats = this.module === 'stats'
-  if (this.plugin.onInput) {
-    for (var inChannel of this.inChannels) {
-      this.pipeline.on(inChannel, this.plugin.onInput.bind(this.plugin))
-    }
-  }
-  this.waitingOn = {}
-}
-
-Stage.prototype.emitEvent = function(event) {
-  if (event) {
-    for (var outChannel of this.outChannels) {
-      this.pipeline.emit(outChannel, event, this.name)
-    }
-  }
-}
-
-Stage.prototype.emitError = function(err) {
-  err.stage = this.name
-  this.pipeline.emit(this.errChannel, err)
-}
-
-Stage.prototype.emitStats = function(data) {
-  data.stage = this.name
-  this.pipeline.emit(this.statsChannel, data)
-}
-
-Stage.prototype.stop = function(input) {
-  var cb = function() {
-    this.pipeline.emit(this.name + '.stopped', this.name)
-    this.stopped = true
-    this.log.debug(this.name, 'stopped')
-  }
-  delete this.waitingOn[input]
-  var waitingOn = Object.keys(this.waitingOn)
-  if (waitingOn.length === 0) {
-    this.log.info(this.name, 'stopping via', input || 'SHUTDOWN')
-    if (this.plugin.stop) {
-      this.plugin.stop(cb.bind(this))
-    }
-    else {
-      cb.call(this)
-    }
-  }
-}
-
-Stage.prototype.waitOn = function(stage) {
-  this.waitingOn[stage] = true
-}
-
-Stage.prototype.inputs = function(stages) {
-  var matches = []
-  for (var name in stages) {
-    if (lodash.intersection(stages[name].outChannels, this.inChannels).length !== 0) {
-      matches.push(name)
-    }
-  }
-  return matches
-}
-
-Stage.prototype.outputs = function(stages) {
-  var matches = []
-  for (var name in stages) {
-    if (lodash.intersection(stages[name].inChannels, this.outChannels).length !== 0) {
-      matches.push(name)
-    }
-  }
-  return matches
+    })
+  })
 }
 
 CLI.prototype.pipelinePaths = function() {
   // Scope for closures since bind() on a generator returns a normal function.
-  var stages = this.stages
+  const stages = this.stages
   // Generate all paths that end here.
-  var genpaths = function*(name) {
-    var stage = stages[name]
+  const genpaths = function * (name) {
+    const stage = stages[name]
     if (stage === undefined) {
       return yield [ {reason: 'UNDEFINED', name: name} ]
     }
     if (stage.isInput) {
       return yield [ {reason: 'INPUT', name: name} ]
     }
-    var paths = []
-    for (var input of stage.inputs(stages)) {
+    const paths = []
+    stage.inputs(stages).forEach((input) => {
       // TODO: Detect loops
-      var i, pathiter = genpaths(input)
+      let i
+      const pathiter = genpaths(input)
       while (true) {
         i = pathiter.next()
         if (i.done) {
@@ -252,7 +203,7 @@ CLI.prototype.pipelinePaths = function() {
         }
         paths.push(i.value.concat([{name: name}]))
       }
-    }
+    })
     if (paths.length === 0) {
       if (stage.isErrors) {
         return yield [ {reason: 'ERRORS', name: name} ]
@@ -264,82 +215,84 @@ CLI.prototype.pipelinePaths = function() {
         return yield [ {reason: 'DEADEND', name: name} ]
       }
     }
-    yield* paths
+    yield * paths
   }
-  var paths = []
-  for (var name in this.stages) {
-    var stage = this.stages[name]
+  const paths = []
+  _.each(this.stages, (stage, name) => {
     if (stage.outputs(stages).length === 0) {
       // Start at stages with no outputs and work our way back.
-      var i, pathiter = genpaths(name)
+      let i
+      const pathiter = genpaths(name)
       while (true) {
         i = pathiter.next()
         if (i.done) {
           break
         }
         if (stage.isOutput) {
-          i.value[i.value.length-1].reason = 'OUTPUT'
+          i.value[i.value.length - 1].reason = 'OUTPUT'
         }
         else {
-          i.value[i.value.length-1].reason = 'DEADEND'
+          i.value[i.value.length - 1].reason = 'DEADEND'
         }
         paths.push(i.value)
       }
     }
-  }
+  })
   return paths
 }
 
 CLI.prototype.startPipeline = function() {
-  for (var name in this.stages) {
-    try {
-      var stage = this.stages[name]
-      if (stage.plugin.start) {
-        stage.log.info(name, 'starting')
-        stage.plugin.start()
-      }
-    }
-    catch (err) {
-      stage.log.error(err, 'failed to start')
-    }
-  }
+  const starters = _.values(this.stages).map(i => i.start)
+  Promise.resolve(starters.map(i => i()))
+    .each((msg) => {
+      this.log.info(msg, 'started')
+    })
+    .then(() => {
+      this.log.info('pipeline startup complete')
+      this.pipeline.emit('READY')
+    })
+    .catch((err) => {
+      this.log.error(`failed to start pipeline: ${err}`)
+      process.exit(EXITS.START)
+    })
 }
 
 CLI.prototype.shutdown = function(reason) {
+  // TODO: Put "wait for startup" logic here so plugins need not worry about it.
   this.log.info('shutting down', {reason: reason})
   // Stop all input, error, & stats channels.  Dependent stages should follow.
-  for (var name in this.stages) {
-    var stage = this.stages[name]
+  // TODO: Promises Promises!
+  _.each(this.stages, (stage, name) => {
     if (stage.isInput || stage.isErrors || stage.isStats) {
       stage.stop()
     }
-  }
+  })
+  // TODO: Stop stages, then stats, then errors
   setInterval(this.reportOnShutdown.bind(this), 1000)
-  setTimeout(this.terminate.bind(this), 10000)
+  setTimeout(this.terminate.bind(this), this.shutdownTimeout)
 }
 
 CLI.prototype.reportOnShutdown = function() {
-  var shutdown = true
-  for (var name in this.stages) {
-    var stage = this.stages[name]
-    if (!stage.stopped) {
+  let shutdown = true
+  _.each(this.stages, (stage, name) => {
+    if (!stage.stopped()) {
       shutdown = false
-      this.log.debug(name, 'waiting on', Object.keys(stage.waitingOn).join(',') || 'SELF')
+      this.log.info(name, 'waiting on', Object.keys(stage.waitingOn).join(',') || 'SELF')
     }
-  }
+  })
   if (shutdown) {
     this.log.info('all stages shut down cleanly')
-    process.exit(0)
+    process.exit(EXITS.SUCCESS)
   }
 }
 
 CLI.prototype.terminate = function() {
-  this.log.error('timed out waiting for pipeline to shut down') 
-  process.exit(2)
+  this.log.error('timed out waiting for pipeline to shut down')
+  process.exit(EXITS.TIMEOUT)
 }
 
 if (require.main === module) {
-  var logbus = new CLI()
+  const logbus = new CLI() // eslint-disable-line no-unused-vars
 }
 else {
   module.exports = CLI

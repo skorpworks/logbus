@@ -1,0 +1,35 @@
+#! /bin/sh
+
+POSITIONAL=()
+FORMAT=json
+SIZE=100
+SINCE=''
+CURSOR=''
+while [[ $# -gt 0 ]]; do
+    NAME=$1
+    shift
+    VAL=$1
+    shift
+    POSITIONAL+=($VAL)
+    case $NAME in
+        -o)
+            FORMAT=$VAL
+            ;;
+        -n)
+            SIZE=$VAL
+            ;;
+        --since)
+            SINCE=$VAL
+            ;;
+        --after-cursor)
+            CURSOR=$(( $VAL + 1 ))
+            ;;
+    esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+if test -n "$SINCE"; then
+    echo '{ "__CURSOR" : "0", "__REALTIME_TIMESTAMP" : "1000000", "MESSAGE" : "start" }'
+else
+    echo '{ "__CURSOR" : "'$CURSOR'", "__REALTIME_TIMESTAMP" : "'$CURSOR'000000", "MESSAGE" : "msg-'$CURSOR'" }'
+fi

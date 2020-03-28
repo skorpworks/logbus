@@ -1,0 +1,24 @@
+[2018-05-07T16:10:38,635][WARN][kafka.network.Processor] Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.80:34048-6418
+[2018-05-07T16:11:32,455][WARN][kafka.network.Processor] Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.228:53906-6418
+[2018-05-07T16:11:32,457][WARN][kafka.network.Processor] Attempting to send response via channel for which there is no open connection, connection id 10.0.0.2:9092-10.0.1.228:53910-6418
+[2018-05-07T16:14:34,258][WARN][kafka.server.ReplicaFetcherThread][ReplicaFetcher replicaId=3, leaderId=1, fetcherId=0] Error in fetch to broker 1, request (type=FetchRequest, replicaId=3, maxWait=500, minBytes=1, maxBytes=10485760, fetchData={__consumer_offsets-0=(offset=299678454, logStartOffset=187457977, maxBytes=1048576), __consumer_offsets-1=(offset=299923454, logStartOffset=187412386, maxBytes=1048576)}, isolationLevel=READ_UNCOMMITTED)
+java.io.IOException: Connection to 1 was disconnected before the response was read
+        at org.apache.kafka.clients.NetworkClientUtils.sendAndReceive(NetworkClientUtils.java:95)
+        at kafka.server.ReplicaFetcherBlockingSend.sendRequest(ReplicaFetcherBlockingSend.scala:96)
+        at kafka.server.ReplicaFetcherThread.fetch(ReplicaFetcherThread.scala:205)
+        at kafka.server.ReplicaFetcherThread.fetch(ReplicaFetcherThread.scala:41)
+        at kafka.server.AbstractFetcherThread.processFetchRequest(AbstractFetcherThread.scala:149)
+        at kafka.server.AbstractFetcherThread.doWork(AbstractFetcherThread.scala:113)
+        at kafka.utils.ShutdownableThread.run(ShutdownableThread.scala:64)
+[2018-06-28T00:00:42,806][INFO ][kafka.log.Log            ] [Log partition=foo-42, dir=/data] Incrementing log start offset to 1234
+[2018-06-07T17:44:03,233][WARN ][kafka.network.Processor  ] Attempting to send response via channel for which there is no open connection, connection id 10.17.0.2:9092-10.228.1.85:45858-62966
+[2018-06-07T17:44:03,234][WARN ][kafka.network.Processor  ] Attempting to send response via channel for which there is no open connection, connection id 10.17.0.2:9092-10.228.1.85:45858-62966
+[2018-06-07T17:44:05,235][WARN ][kafka.network.Processor  ] Attempting to send response via channel for which there is no open connection, connection id 10.17.0.2:9092-10.228.1.85:45858-62966
+[2018-06-07T23:21:38,862][WARN ][state.change.logger      ] [Broker id=4] Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 25 for partition foo-19 since its associated leader epoch 16 is not higher than the current leader epoch 16
+[2018-06-28T00:00:42,811][INFO ][kafka.server.epoch.LeaderEpochFileCache] Cleared earliest 0 entries from epoch cache based on passed offset 1234 leaving 2 in EpochFile for partition foo-42
+[2018-06-28T00:03:05,944][INFO ][kafka.log.LogSegment     ] Deleted log /data/foo-42/00000000000000127487.log.deleted.
+[2018-06-28T00:03:05,944][INFO ][kafka.log.LogSegment     ] Deleted offset index /data/foo-42/00000000000000127487.index.deleted.
+[2018-05-07 17:49:46,476][WARN   ][state.change.logger] [Broker id=3] Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 5 for partition foo-0 since its associated leader epoch 0 is not higher than the current leader epoch 0
+[2018-05-07 17:49:46,576][WARN   ][state.change.logger] [Broker id=3] Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 5 for partition bar-0 since its associated leader epoch 0 is not higher than the current leader epoch 0
+[2018-05-07 17:49:46,676][WARN   ][state.change.logger] [Broker id=3] Ignoring LeaderAndIsr request from controller 2 with correlation id 1 epoch 5 for partition foo-1 since its associated leader epoch 0 is not higher than the current leader epoch 0
+[2018-05-07 17:49:47,776][INFO   ][state.change.logger] [Broker id=3] Skipped the become-follower state change after marking its partition as follower with correlation id 1 from controller 2 epoch 5 for partition __consumer_offsets-0 (last update controller epoch 5) since the new leader 2 is the same as the old leader

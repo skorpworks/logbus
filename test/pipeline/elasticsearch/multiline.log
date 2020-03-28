@@ -1,0 +1,65 @@
+[2017-07-23T02:18:26,551][INFO ][org.elasticsearch.discovery.zen.ZenDiscovery] master_left [{master-1}{foo}{bar}{10.44.0.101}{10.44.0.101:9300}{ml.max_open_jobs=10, rack=r8, ml.enabled=true}], reason [shut_down]
+[2017-09-23T02:18:26,553][WARN ][org.elasticsearch.discovery.zen.ZenDiscovery] master left (reason = shut_down), current nodes: nodes:
+   {master-2}{yeee}{boye}{10.44.0.100}{10.44.0.100:9300}{ml.max_open_jobs=10, rack=r42, ml.enabled=true}, master
+   {data-1}{pea}{nut}{10.44.0.106}{10.44.0.106:9300}{ml.max_open_jobs=10, rack=r42, ml.enabled=true}
+[2017-07-23T02:20:37,885][ERROR][org.elasticsearch.xpack.monitoring.exporter.http.VersionHttpResource] failed to verify minimum version [5.0.0-beta1] on the [xpack.monitoring.exporters.id1] monitoring cluster
+org.elasticsearch.client.ResponseException: GET http://10.44.0.101:9201/?filter_path=version.number: HTTP/1.1 503 Service Unavailable
+{
+  "version" : {
+    "number" : "5.6.1"
+  }
+}
+
+        at org.elasticsearch.client.RestClient$1.completed(RestClient.java:354) ~[?:?]
+        at org.elasticsearch.client.RestClient$1.completed(RestClient.java:343) ~[?:?]
+        at org.apache.http.concurrent.BasicFuture.completed(BasicFuture.java:119) ~[?:?]
+        at org.apache.http.impl.nio.client.DefaultClientExchangeHandlerImpl.responseCompleted(DefaultClientExchangeHandlerImpl.java:177) ~[?:?]
+        at org.apache.http.nio.protocol.HttpAsyncRequestExecutor.processResponse(HttpAsyncRequestExecutor.java:436) ~[?:?]
+        at org.apache.http.nio.protocol.HttpAsyncRequestExecutor.inputReady(HttpAsyncRequestExecutor.java:326) ~[?:?]
+        at org.apache.http.impl.nio.DefaultNHttpClientConnection.consumeInput(DefaultNHttpClientConnection.java:265) ~[?:?]
+        at org.apache.http.impl.nio.client.InternalIODispatch.onInputReady(InternalIODispatch.java:81) ~[?:?]
+        at org.apache.http.impl.nio.client.InternalIODispatch.onInputReady(InternalIODispatch.java:39) ~[?:?]
+        at org.apache.http.impl.nio.reactor.AbstractIODispatch.inputReady(AbstractIODispatch.java:114) ~[?:?]
+        at org.apache.http.impl.nio.reactor.BaseIOReactor.readable(BaseIOReactor.java:162) ~[?:?]
+        at org.apache.http.impl.nio.reactor.AbstractIOReactor.processEvent(AbstractIOReactor.java:337) ~[?:?]
+        at org.apache.http.impl.nio.reactor.AbstractIOReactor.processEvents(AbstractIOReactor.java:315) ~[?:?]
+        at org.apache.http.impl.nio.reactor.AbstractIOReactor.execute(AbstractIOReactor.java:276) ~[?:?]
+        at org.apache.http.impl.nio.reactor.BaseIOReactor.execute(BaseIOReactor.java:104) ~[?:?]
+        at org.apache.http.impl.nio.reactor.AbstractMultiworkerIOReactor$Worker.run(AbstractMultiworkerIOReactor.java:588) ~[?:?]
+        at java.lang.Thread.run(Thread.java:745) [?:1.8.0_66-internal]
+[2018-05-22T21:04:05,154][WARN ][org.elasticsearch.cluster.NodeConnectionsService] failed to connect to node {foo}{VMfOtM7_Rb2zmek4fFRFWw}{ehZ7nxSSQEW2PFgvJVkqRg}{192.168.1.4}{192.168.1.4:9300}{rack=5} (tried [1] times)
+org.elasticsearch.transport.ConnectTransportException: [foo][192.168.1.4:9300] connect_timeout[30s]
+        at org.elasticsearch.transport.netty4.Netty4Transport.connectToChannels(Netty4Transport.java:363) ~[?:?]
+        at org.elasticsearch.transport.TcpTransport.openConnection(TcpTransport.java:570) ~[elasticsearch-5.6.9.jar:5.6.9]
+        at org.elasticsearch.transport.TcpTransport.connectToNode(TcpTransport.java:473) ~[elasticsearch-5.6.9.jar:5.6.9]
+        at org.elasticsearch.transport.TransportService.connectToNode(TransportService.java:342) ~[elasticsearch-5.6.9.jar:5.6.9]
+        at org.elasticsearch.transport.TransportService.connectToNode(TransportService.java:329) ~[elasticsearch-5.6.9.jar:5.6.9]
+        at org.elasticsearch.cluster.NodeConnectionsService.validateAndConnectIfNeeded(NodeConnectionsService.java:154) [elasticsearch-5.6.9.jar:5.6.9]
+        at org.elasticsearch.cluster.NodeConnectionsService$ConnectionChecker.doRun(NodeConnectionsService.java:183) [elasticsearch-5.6.9.jar:5.6.9]
+        at org.elasticsearch.common.util.concurrent.ThreadContext$ContextPreservingAbstractRunnable.doRun(ThreadContext.java:674) [elasticsearch-5.6.9.jar:5.6.9]
+        at org.elasticsearch.common.util.concurrent.AbstractRunnable.run(AbstractRunnable.java:37) [elasticsearch-5.6.9.jar:5.6.9]
+        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) [?:1.8.0_161]
+        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) [?:1.8.0_161]
+        at java.lang.Thread.run(Thread.java:748) [?:1.8.0_161]
+Caused by: io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: 192.168.1.4/192.168.1.4:9300
+        at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method) ~[?:?]
+        at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717) ~[?:?]
+        at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:352) ~[?:?]
+        at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:340) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:632) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.processSelectedKeysPlain(NioEventLoop.java:544) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:498) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:458) ~[?:?]
+        at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:858) ~[?:?]
+        ... 1 more
+Caused by: java.net.ConnectException: Connection refused
+        at sun.nio.ch.SocketChannelImpl.checkConnect(Native Method) ~[?:?]
+        at sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:717) ~[?:?]
+        at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:352) ~[?:?]
+        at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:340) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:632) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.processSelectedKeysPlain(NioEventLoop.java:544) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:498) ~[?:?]
+        at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:458) ~[?:?]
+        at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:858) ~[?:?]
+        ... 1 more

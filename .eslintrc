@@ -1,7 +1,7 @@
 ---
 extends: standard
 parserOptions:
-  ecmaVersion: 6
+  ecmaVersion: 2019
   sourceType: script
 env:
   node: true
@@ -11,3 +11,9 @@ rules:
   key-spacing: off
   comma-dangle: off
   space-before-function-paren: off
+plugins:
+  - jest
+overrides:
+  - files: "**/*-spec.js"
+    extends:
+    - "plugin:jest/recommended"
