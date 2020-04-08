@@ -39,6 +39,8 @@ const Promise = require('bluebird')
 const util = require('util')
 const path = require('path')
 const _ = require('lodash')
+const yaml = require('js-yaml')
+const fs = require('fs')
 
 const MODULES = {
   'file-in': './lib/plugins/input/file',
@@ -77,10 +79,12 @@ const MODULES = {
   stdout: './lib/plugins/output/stdout',
 }
 
+const TEMPLATES = {}
+
 function CLI() {
   const bunyan = require('bunyan')
   const argv = require('docopt').docopt(USAGE)
-  const config = require('js-yaml').load(require('fs').readFileSync(argv['<config>'], 'utf8'))
+  const config = yaml.load(fs.readFileSync(argv['<config>'], 'utf8'))
   this.log = bunyan.createLogger({name: process.argv[1].split('/').pop(), level: bunyan[argv['--verbosity'].toUpperCase()]})
   process.setMaxListeners(Infinity)
   // TODO: overloading the use of "pipeline" is confusing
@@ -93,6 +97,9 @@ function CLI() {
   process.once('SIGTERM', this.shutdown.bind(this, 'SIGTERM'))
   if (config.plugins) {
     this.loadPlugins(path.resolve(path.dirname(argv['<config>'])), config.plugins)
+  }
+  if (config.templates) {
+    this.loadTemplates(path.resolve(path.dirname(argv['<config>'])), config.templates)
   }
   this.loadPipeline(config.pipeline)
   const invalid = {}
@@ -133,9 +140,25 @@ CLI.prototype.loadPlugins = function(basedir, plugins) {
   })
 }
 
+CLI.prototype.loadTemplates = function(basedir, templates) {
+  _.each(templates, (props, name) => {
+    if (props.path[0] !== '/') {
+      props.path = path.join(basedir, props.path)
+    }
+    TEMPLATES[name] = yaml.load(fs.readFileSync(props.path, 'utf8'))
+  })
+}
+
 CLI.prototype.loadPipeline = function(stages) {
   this.stages = {}
   _.each(stages, (stage, name) => {
+    if (stage.template) {
+      const [ns, template] = stage.template.split('.')
+      if (!TEMPLATES[ns]) {
+        throw new Error(`undefined stage template: ${stage.template}`)
+      }
+      stage = _.merge(TEMPLATES[ns][template], stage)
+    }
     if (!stage.module) {
       stage.module = name
     }
