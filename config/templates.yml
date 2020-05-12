@@ -1,0 +1,19 @@
+
+# Default outChannels for a stage is [STAGENAME], so calling it something other
+# than `stats` & `errors` to avoid clash with those inherent channels.
+
+log-stats:
+  module: stats
+  inChannels:
+    - stats
+  interval: 5
+  enable:
+    memory: true
+    rates: false
+
+log-errors:
+  module: errors
+  inChannels:
+    - errors
+  interval: 5
+  stackDepth: 1

@@ -3,14 +3,14 @@
 #   my-cool-plugin:  # the name to reference in a stage's `module` field
 #     path: name.js  # relative paths are resolved relative to this config's directory
 
+templates:
+  my-templates:          # the namespace for stages in this template file
+    path: templates.yml  # relative paths are resolved relative to this config's directory
+
 pipeline:
 
-  # Enable explicit garbage collection every 60 seconds
-  gc:
-    interval: 60
-
   stdin:
-    module: stdin
+    module: stdin  # technically not needed since the module defaults to the stage name
 
   lines:
     inChannels:
@@ -145,39 +145,29 @@ pipeline:
 
   # Default outChannels for a stage is [STAGENAME], so calling it something
   # other than `stats` to avoid loop.
-  xstats:
-    module: stats
-    inChannels:
-      - stats
-    interval: 5
-    enable:
-      memory: true
-      rates: false
+  log-stats:
+    template: my-templates.log-stats
+    interval: 30  # override template's interval
 
   # Store pipeline stats to elasticsearch.
   es-stats:
     module: elasticsearch
     inChannels:
-      - xstats
+      - log-stats
     index: stats
     type: sample
     api: '2.3'
 
   # Capture errors.
-  errors:
-    inChannels:
-      - errors
-    outChannels:
-      - log
-    interval: 5
-    stackDepth: 1
+  log-errors:
+    template: my-templates.log-errors
 
   # Emit stats & errors to the conole.
   console-log:
     module: log
     inChannels:
-      - xstats
-      - log
+      - log-stats
+      - log-errors
     level: INFO
     extra:
       foo: bar
