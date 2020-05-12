@@ -157,7 +157,7 @@ CLI.prototype.loadPipeline = function(stages) {
       if (!TEMPLATES[ns]) {
         throw new Error(`undefined stage template: ${stage.template}`)
       }
-      stage = _.merge(TEMPLATES[ns][template], stage)
+      stage = _.merge({}, TEMPLATES[ns][template], stage)
     }
     if (!stage.module) {
       stage.module = name
