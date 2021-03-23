@@ -4,7 +4,7 @@
 const _ = require('lodash')
 
 module.exports = (name, props, plugin, logbus) => {
-  logbus.pipeline.on('READY', (event) => {
+  logbus.pipeline.on('READY', () => {
     // TODO: share a logbus object?
     // log.warn('READY?', name)
     logbus.ready = true

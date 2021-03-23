@@ -115,7 +115,7 @@ function CLI() {
     if (argv['--check']) {
       console.log()
       console.log(start.reason, ':', start.name)
-      _.each(stages, (stage, name) => {
+      _.each(stages, stage => {
         console.log('  - %s', stage.name)
       })
       console.log(end.reason, ':', end.name)
@@ -285,7 +285,7 @@ CLI.prototype.shutdown = function(reason) {
   this.log.info('shutting down', {reason: reason})
   // Stop all input, error, & stats channels.  Dependent stages should follow.
   // TODO: Promises Promises!
-  _.each(this.stages, (stage, name) => {
+  _.each(this.stages, stage => {
     if (stage.isInput || stage.isErrors || stage.isStats) {
       stage.stop()
     }

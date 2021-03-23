@@ -1,11 +1,9 @@
 
-FROM node:10-slim
-
-WORKDIR /opt/logbus
-
-# Add node modules in a way that will allow Docker to cache them.
+FROM node:14-slim AS build
+WORKDIR /app
 ADD package.json .
-RUN yarn --ignore-optional --prod
+ADD yarn.lock .
+RUN yarn --ignore-optional --prod --frozen-lockfile
 ADD lib lib
 ADD stage.js .
 ADD index.js .
@@ -22,10 +20,19 @@ RUN if test -n "${ALASQL}"; then yarn add --no-lockfile alasql@${ALASQL}; fi
 ARG MAXMIND
 RUN if test -n "${MAXMIND}"; then yarn add --no-lockfile maxmind-db-reader@${MAXMIND}; fi
 
-# The `bin` in package.json doesn't work since node_modules in .dockerignore
-#
-#   npm ERR! enoent ENOENT: no such file or directory, chmod '/usr/local/lib/node_modules/logbus/index.js'
-#
-RUN ln -s /opt/logbus/index.js /usr/bin/logbus
+FROM build AS test
+RUN yarn install --frozen-lockfile
+ADD test .
+# fail if needs linting
+ADD .eslintrc.yml .
+RUN yarn eslint --format unix lib *.js
+# fail if any vulnerabilities >= moderate
+RUN yarn audit --groups dependencies --level moderate || test $? -le 2
+# fail if unit tests fail
+RUN yarn jest --coverage --color
 
-ENTRYPOINT ["logbus"]
+FROM build AS prod
+COPY --from=test /app /app
+WORKDIR /app
+CMD ["/app"]
+

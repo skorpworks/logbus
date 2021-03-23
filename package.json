@@ -1,6 +1,6 @@
 {
   "name": "logbus",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Log shipper written in Node",
   "directories": {
     "test": "test"
@@ -14,12 +14,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/skorpworks/logbus"
+    "url": "https://gitlab.com/erik-stephens/logbus"
   },
   "bugs": {
-    "url": "https://github.com/skorpworks/logbus/issues"
+    "url": "https://gitlab.com/erik-stephens/logbus/issues"
   },
   "jest": {
+    "roots": [
+      "./lib"
+    ],
     "testMatch": [
       "**/*-spec.js"
     ]
@@ -37,10 +40,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "bluebird": "^3.5.1",
-    "bunyan": "^1.8.5",
+    "bunyan": "^1.8.12",
     "docopt": "^0.6.2",
     "eventemitter3": "^1.2.0",
-    "glob": "^7.1.2",
+    "glob": "~7.1",
     "js-yaml": "^3.3.1",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
@@ -54,16 +57,16 @@
     "tail-forever": "^0.3.16"
   },
   "devDependencies": {
-    "eslint": "^6.7.2",
+    "eslint": "~7",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-jest": "^23.1.1",
+    "eslint-plugin-jest": "~24",
     "eslint-plugin-node": "^5.2.0",
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-standard": "^3.0.1",
     "jest": "^24.9.0",
     "jsdoc": "^3.5.5",
     "nock": "^11.4.0",
-    "semantic-release": "^15.8.1"
+    "semantic-release": "~17"
   }
 }

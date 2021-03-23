@@ -1,4 +1,4 @@
-.PHONY: help test unittest test-kafka test-tail coverage docker-build docker-publish rpm-publish
+.PHONY: help test unit-test test-kafka test-tail coverage docker-build docker-publish rpm-publish
 .DEFAULT_GOAL := help
 
 SHELL := /bin/bash
@@ -33,8 +33,8 @@ lint: ## check code for errors
 	$(NODE_BIN)/eslint --format unix lib *.js
 
 
-unit-test: ## run unit tests
-	yarn jest --coverage --color
+unit-test: node_modules ## run unit tests
+	yarn jest --coverage --color --onlyFailures --bail
 
 
 example-etl: node_modules ## run etl example
