@@ -1,6 +1,6 @@
 
-# Default outChannels for a stage is [STAGENAME], so calling it something other
-# than `stats` & `errors` to avoid clash with those inherent channels.
+# Default outChannels for a stage is ${STAGENAME}, so calling it something other
+# than `stats` & `errors` to avoid clash with those built-in, reserved channels.
 
 log-stats:
   module: stats

@@ -34,7 +34,7 @@ lint: ## check code for errors
 
 
 unit-test: node_modules ## run unit tests
-	yarn jest --coverage --color --onlyFailures --bail
+	yarn jest --coverage --color --bail
 
 
 example-etl: node_modules ## run etl example
