@@ -39,8 +39,11 @@ const Promise = require('bluebird')
 const util = require('util')
 const path = require('path')
 const _ = require('lodash')
-const yaml = require('js-yaml')
 const fs = require('fs')
+
+const yaml = require('js-yaml')
+const unsafe = require('js-yaml-js-types').all
+const schema = yaml.DEFAULT_SCHEMA.extend(unsafe)
 
 const MODULES = {
   'file-in': './lib/plugins/input/file',
@@ -84,7 +87,7 @@ const TEMPLATES = {}
 function CLI() {
   const bunyan = require('bunyan')
   const argv = require('docopt').docopt(USAGE)
-  const config = yaml.load(fs.readFileSync(argv['<config>'], 'utf8'))
+  const config = yaml.load(fs.readFileSync(argv['<config>'], 'utf8'), {schema})
   this.log = bunyan.createLogger({name: process.argv[1].split('/').pop(), level: bunyan[argv['--verbosity'].toUpperCase()]})
   process.setMaxListeners(Infinity)
   // TODO: overloading the use of "pipeline" is confusing
@@ -145,7 +148,7 @@ CLI.prototype.loadTemplates = function(basedir, templates) {
     if (props.path[0] !== '/') {
       props.path = path.join(basedir, props.path)
     }
-    TEMPLATES[name] = yaml.load(fs.readFileSync(props.path, 'utf8'))
+    TEMPLATES[name] = yaml.load(fs.readFileSync(props.path, 'utf8'), {schema})
   })
 }
 

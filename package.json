@@ -1,6 +1,6 @@
 {
   "name": "logbus",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Log shipper written in Node",
   "directories": {
     "test": "test"
@@ -45,6 +45,7 @@
     "eventemitter3": "4.0.x",
     "glob": "7.1.x",
     "js-yaml": "4.1.x",
+    "js-yaml-js-types": "1.0.x",
     "lodash": "4.17.x",
     "moment": "2.29.x",
     "object-sizeof": "1.6.x",
