@@ -86,10 +86,12 @@ endif
 	@docker rm -f logbus-e2e-elasticsearch > /dev/null
 
 
-docker-build: KAFKA=# with kafka support
-docker-build: MAXMIND=# with maxmind geo db support
+docker-test: Dockerfile ## run checks from inside docker image
+	docker build --target=test -t $(NAME) .
+
+
 docker-build: Dockerfile ## build docker image
-	docker build --build-arg KAFKA=$(KAFKA) --build-arg MAXMIND=$(MAXMIND) -t $(NAME) .
+	docker build --target=prod -t $(NAME) .
 
 
 docker-publish: ## publish docker image to repo
