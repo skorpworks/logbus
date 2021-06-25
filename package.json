@@ -1,6 +1,6 @@
 {
   "name": "logbus",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A log processor that supports user-defined pipelines.",
   "directories": {
     "test": "test"
