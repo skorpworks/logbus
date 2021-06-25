@@ -5,7 +5,7 @@ SHELL := /bin/bash
 
 NAME := logbus
 VERSION := $(shell jq -r .version package.json)
-MAINTAINER := foo@bar.com
+MAINTAINER := erik@tfks.net
 
 DOCKER_REPO := docker.repo
 DOCKER_TAG := $(DOCKER_REPO)/$(NAME):$(VERSION)
@@ -29,11 +29,11 @@ node_modules: package.json ## install dependencies
 	touch node_modules
 
 
-lint: ## check code for errors
-	$(NODE_BIN)/eslint --format unix lib *.js
+lint: node_modules ## check code for errors
+	$(NODE_BIN)/eslint --fix --format unix lib *.js
 
 
-unit-test: node_modules ## run unit tests
+unit-test: lint ## run unit tests
 	yarn jest --coverage --color --bail
 
 

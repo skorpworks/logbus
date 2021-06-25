@@ -1,12 +1,10 @@
 
-'use strict'
 
 const _ = require('lodash')
 
 module.exports = (name, props, plugin, logbus) => {
   logbus.pipeline.on('READY', () => {
-    // TODO: share a logbus object?
-    // log.warn('READY?', name)
+    // TODO: an overly convulted way for main() to communicate that stage is ready
     logbus.ready = true
   })
 
@@ -27,11 +25,11 @@ module.exports = (name, props, plugin, logbus) => {
     if (plugin.start) {
       return plugin.start()
     }
-    else {
-      return new Promise((resolve) => {
-        resolve({stage: logbus.stage})
-      })
-    }
+
+    return new Promise(resolve => {
+      resolve({stage: logbus.stage})
+    })
+
   }
 
   async function stop(input) {
@@ -41,8 +39,7 @@ module.exports = (name, props, plugin, logbus) => {
       if (plugin.stop) {
         try {
           await plugin.stop()
-        }
-        catch (err) {
+        } catch (err) {
           logbus.log.error(err, {stage: name}, 'failed to stop')
         }
       }
@@ -57,9 +54,9 @@ module.exports = (name, props, plugin, logbus) => {
 
   function inputs(stages) {
     const matches = []
-    _.each(stages, (stage, name) => {
+    _.each(stages, (stage, sname) => {
       if (_.intersection(stage.outChannels, inChannels).length !== 0) {
-        matches.push(name)
+        matches.push(sname)
       }
     })
     return matches
@@ -67,14 +64,14 @@ module.exports = (name, props, plugin, logbus) => {
 
   function outputs(stages) {
     const matches = []
-    _.each(stages, (stage, name) => {
+    _.each(stages, (stage, sname) => {
       if (_.intersection(stage.inChannels, props.outChannels).length !== 0) {
-        matches.push(name)
+        matches.push(sname)
       }
     })
     return matches
   }
 
   // TODO: This sucks - all kinds of odd coupling twix stage, plugin, and logbus instance
-  return { start, stop, inputs, outputs, inChannels, outChannels, isInput, isOutput, isErrors, isStats, waitOn, waitingOn, stopped: () => stopped }
+  return {start, stop, inputs, outputs, inChannels, outChannels, isInput, isOutput, isErrors, isStats, waitOn, waitingOn, stopped: () => stopped}
 }

@@ -1,7 +1,7 @@
 {
   "name": "logbus",
-  "version": "0.8.4",
-  "description": "Log shipper written in Node",
+  "version": "0.9.0",
+  "description": "A log processor that supports user-defined pipelines.",
   "directories": {
     "test": "test"
   },
@@ -14,10 +14,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/erik-stephens/logbus"
+    "url": "https://github.com/erik-stephens/logbus"
   },
   "bugs": {
-    "url": "https://gitlab.com/erik-stephens/logbus/issues"
+    "url": "https://github.com/erik-stephens/logbus/issues"
   },
   "jest": {
     "roots": [
@@ -36,13 +36,12 @@
     "elasticsearch",
     "indexing"
   ],
-  "homepage": "https://github.com/skorpworks/logbus",
+  "homepage": "https://github.com/erik-stephens/logbus",
   "license": "Apache-2.0",
   "dependencies": {
     "bluebird": "3.7.x",
     "bunyan": "1.8.x",
     "docopt": "0.6.x",
-    "eventemitter3": "4.0.x",
     "glob": "7.1.x",
     "js-yaml": "4.1.x",
     "js-yaml-js-types": "1.0.x",
